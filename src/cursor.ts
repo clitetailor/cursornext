@@ -4,9 +4,11 @@ export interface CursorStruct {
   end?: number
 }
 
-export interface CursorLike {
-  doc: string
-}
+export type CursorLike =
+  | {
+      doc: string
+    }
+  | string
 
 export class Cursor {
   doc: string
@@ -23,7 +25,13 @@ export class Cursor {
       : undefined
   }
 
-  static from({ doc }: CursorLike): Cursor {
+  static from(cursorLike: CursorLike): Cursor {
+    if (typeof cursorLike === 'string') {
+      return new Cursor({ doc: cursorLike })
+    }
+
+    const { doc } = cursorLike
+
     return new Cursor({ doc })
   }
 
@@ -92,10 +100,9 @@ export class Cursor {
     return undefined
   }
 
-  exec(regExp: RegExp): RegExpExecArray | null {
-    /**
-     * TODO: Need to be cached!
-     */
+  exec(input: RegExp | string): RegExpExecArray | null {
+    const regExp = new RegExp(input)
+
     const flags = regExp.flags
     const hat = regExp.source[0] === '^'
 
@@ -139,5 +146,14 @@ export class Cursor {
     }
 
     return this.doc.substring(this.index, cursorOrIndex.index)
+  }
+
+  isAt(cursorOrIndex: Cursor | number): boolean {
+    const index =
+      typeof cursorOrIndex === 'number'
+        ? cursorOrIndex
+        : cursorOrIndex.index
+
+    return this.index === index
   }
 }

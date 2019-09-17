@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "build": "babel index.ts -o index.js",
-    "format": "prettier -c .prettierrc.yaml --write index.ts"
+    "format": "prettier -c .prettierrc.yaml --write index.ts",
+    "test": "ava"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
     "@babel/preset-env": "^7.6.0",
     "@babel/preset-typescript": "^7.6.0",
     "@types/node": "^12.7.3",
+    "ava": "^2.3.0",
     "ts-node": "^8.3.0",
     "typescript": "^3.6.2"
   },
@@ -34,5 +36,18 @@
   "bugs": {
     "url": "https://github.com/clitetailor/cursornext/issues"
   },
-  "homepage": "https://github.com/clitetailor/cursornext#readme"
+  "homepage": "https://github.com/clitetailor/cursornext#readme",
+  "ava": {
+    "files": [
+      "test/**/*.ts",
+      "!test/helpers/**/*"
+    ],
+		"compileEnhancements": false,
+		"extensions": [
+			"ts"
+		],
+		"require": [
+			"ts-node/register"
+		]
+	}
 }
