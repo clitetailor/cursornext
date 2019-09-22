@@ -10,9 +10,13 @@ export interface CursorMap {
   [name: string]: Cursor
 }
 
-export type CaptureResult = {
+export interface CaptureResult {
   [name: string]: any
-  iter(): CaptureIterable
+  iter(options?: Partial<IterableOptions>): CaptureIterable
+}
+
+export interface IterableOptions {
+  named: boolean | undefined
 }
 
 export class CaptureIterable {
@@ -79,9 +83,24 @@ export class CursorTest {
 
         caretCursor.next(prefixLen)
 
-        names.push(
-          !noLabel ? parseLabel(caretCursor) : undefined
-        )
+        if (!noLabel) {
+          const name = parseLabel(caretCursor)
+
+          switch (name) {
+            case 'iter':
+            case '':
+              names.push(undefined)
+              break
+            case 'symbol':
+              names.push(prefix)
+              break
+            default:
+              names.push(name)
+              break
+          }
+        } else {
+          names.push(undefined)
+        }
 
         lastIndex = caretCursor.index
         offset += caretCursor.index - index
@@ -111,7 +130,14 @@ export class CursorTest {
 
     return {
       ...namedCursors,
-      iter: () => new CaptureIterable(cursors)
+      iter: ({
+        named = false
+      }: Partial<IterableOptions> = {}) =>
+        named
+          ? new CaptureIterable(cursors)
+          : new CaptureIterable(
+              cursors.filter((cursor, index) => !names[index])
+            )
     }
   }
 }
