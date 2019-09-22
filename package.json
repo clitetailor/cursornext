@@ -29,6 +29,7 @@
     "@babel/preset-typescript": "^7.6.0",
     "@types/node": "^12.7.3",
     "ava": "^2.3.0",
+    "prettier": "^1.18.2",
     "ts-node": "^8.3.0",
     "typescript": "^3.6.2"
   },
@@ -42,12 +43,12 @@
       "test/**/*.ts",
       "!test/helpers/**/*"
     ],
-		"compileEnhancements": false,
-		"extensions": [
-			"ts"
-		],
-		"require": [
-			"ts-node/register"
-		]
-	}
+    "compileEnhancements": false,
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
+  }
 }
