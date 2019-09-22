@@ -1,7 +1,7 @@
 import { Cursor } from './cursor'
 import { parseLabel } from './utils'
 
-export interface TestOptions {
+export interface CursorTestOptions {
   prefix: string
   noLabel: boolean
 }
@@ -48,12 +48,12 @@ export class CaptureIterable {
   }
 }
 
-export class Test {
-  clone(testOptions: TestOptions) {}
+export class CursorTest {
+  clone(testOptions: CursorTestOptions) {}
 
   capture(
     caretSyntax: string,
-    testOptions?: TestOptions
+    testOptions?: CursorTestOptions
   ): CaptureResult {
     const caretCursor = Cursor.from(caretSyntax)
 
@@ -116,4 +116,4 @@ export class Test {
   }
 }
 
-export const t = new Test()
+export const t = new CursorTest()
