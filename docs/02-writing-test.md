@@ -113,9 +113,6 @@ const iter = t
   .capture('-----🌵()1992🌵()------🌵()12🌵()---🌵()86🌵()---')
   .iter()
 
-let cursor: Cursor
-let marker: Cursor
-
 for (const value in [1992, 12, 86]) {
   const cursor = iter.next()
   const marker = iter.next()
