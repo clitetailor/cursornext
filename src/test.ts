@@ -92,7 +92,7 @@ export class CursorTest {
               names.push(undefined)
               break
             case 'symbol':
-              names.push(prefix)
+              chunks.push(prefix)
               break
             default:
               names.push(name)
