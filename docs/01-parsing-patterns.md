@@ -1,5 +1,4 @@
-Parsing Patterns
-================
+# Parsing Patterns
 
 In cursornext, there are four basic functions that we would use frequently:
 
@@ -8,8 +7,7 @@ In cursornext, there are four basic functions that we would use frequently:
 - Read
 - Backtrack
 
-Move
-----
+## Move
 
 To move the cursor, we can use `next` or `setIndex`. `next` move the cursor a number of characters. By using `next`, we can ensure that the cursor will move forward but not backward:
 
@@ -49,8 +47,7 @@ cursor.setIndex(regexResult.index)
 t.assert(cursor.startsWith('1996'))
 ```
 
-Test
-----
+## Test
 
 In cursornext, there are three methods that we can use to test a cursor:
 
@@ -125,8 +122,7 @@ t.assert(regexResult[0] === '1234')
 t.assert(regexResult.index === 4)
 ```
 
-Read
-----
+## Read
 
 The most common way to read the document is to create a marker cursor. Then, we can use the `takeUntil` method to read the text between two cursors:
 
@@ -154,8 +150,7 @@ cursor.next(5)
 t.assert(cursor.exec(/[a-zA-Z]+/)[0] === 'World')
 ```
 
-Backtrack
----------
+## Backtrack
 
 Sometimes, when working with complex syntax constraint, you may need to backtrack to the previous position. The following example illustrates how to backtrack using `moveTo` method:
 
@@ -167,9 +162,9 @@ const marker = cursor.clone()
 // ...
 // ...
 
-// If the cursor does not sastify the given constrain,
-// backtrack to the marked position.
-if (!sastisfyConstrain(cursor)) {
+// If some constraint are not sastisfied, backtrack
+// the cursor to the marked position.
+if (!sastisfied) {
   cursor.moveTo(marker)
 }
 ```

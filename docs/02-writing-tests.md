@@ -1,6 +1,6 @@
-# Writing Test
+# Writing Tests
 
-For writing test, cursornext provide you with the caret syntax. For example:
+For writing tests, cursornext provide you with the caret syntax. For example:
 
 ```ts
 import { t } from 'cursornext'
