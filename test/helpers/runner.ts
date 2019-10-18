@@ -1,7 +1,7 @@
 import { ExecutionContext } from 'ava'
-import { Cursor, t as cursorTest } from '../../src'
+import { Cursor, t as cursorTest, CursorMap } from '../../src'
 
-export function runParse(
+export function runParseTest(
   t: ExecutionContext,
   isDigit: (cursor: Cursor) => boolean
 ) {
@@ -39,4 +39,19 @@ export function runParse(
     })
     t.is(cursor.index, marker.index)
   })
+}
+
+export function runLocTest(
+  t: ExecutionContext,
+  input: string,
+  line: number,
+  column: number
+) {
+  const iter = cursorTest.capture(input).iter()
+  const cursor = iter.next()
+
+  const loc = cursor.getLoc()
+
+  t.is(loc.line, line)
+  t.is(loc.column, column)
 }

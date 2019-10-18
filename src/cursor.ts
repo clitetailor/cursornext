@@ -1,7 +1,11 @@
+import { Loc } from './loc'
+import { Eol } from './eol'
+
 export interface CursorStruct {
   doc: string
   index?: number
   end?: number
+  eols?: Eol[]
 }
 
 export type CursorLike =
@@ -11,6 +15,7 @@ export type CursorLike =
   | string
 
 export class Cursor {
+  eols?: Eol[]
   doc: string
   index: number
   end?: number
@@ -35,14 +40,61 @@ export class Cursor {
     return new Cursor({ doc })
   }
 
-  clone(options?: Partial<CursorStruct>) {
+  clone(options?: Partial<CursorStruct>): Cursor {
     return new Cursor({
       ...(this as CursorStruct),
       ...(options ? options : {})
     })
   }
 
-  endIndex() {
+  getLoc(): Loc {
+    if (!this.eols) {
+      this.compute()
+    }
+
+    const line = (<Eol[]>this.eols).findIndex(
+      eol => this.index <= eol.start
+    )
+    const column =
+      this.index - (<Eol[]>this.eols)[line - 1].end + 1
+
+    return new Loc({
+      index: this.index,
+      line,
+      column
+    })
+  }
+
+  compute() {
+    this.eols = [new Eol(0, 0)]
+
+    const cursor = new Cursor({
+      doc: this.doc,
+      index: 0
+    })
+
+    while (!cursor.isEof()) {
+      if (cursor.startsWith('\r\n')) {
+        this.eols.push(new Eol(cursor.index, cursor.index + 2))
+
+        cursor.next(2)
+      } else if (
+        cursor.startsWith('\r') ||
+        cursor.startsWith('\n')
+      ) {
+        this.eols.push(new Eol(cursor.index, cursor.index + 1))
+        cursor.next(1)
+      } else {
+        cursor.next(1)
+      }
+    }
+
+    this.eols.push(
+      new Eol(cursor.endIndex(), cursor.endIndex())
+    )
+  }
+
+  endIndex(): number {
     return this.end || this.doc.length
   }
 

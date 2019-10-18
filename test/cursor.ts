@@ -1,13 +1,13 @@
 import test from 'ava'
-import { t as cursorTest, Cursor } from '../src'
-import { runParse } from './helpers/parse'
+import { Cursor } from '../src'
+import { runParseTest } from './helpers/runner'
 
 test('`exec` should work probably', t => {
   function isDigit(cursor: Cursor) {
     return !!cursor.exec(/^[0-9]/)
   }
 
-  runParse(t, isDigit)
+  runParseTest(t, isDigit)
 })
 
 test('`startsWith` should work probably', t => {
@@ -25,7 +25,7 @@ test('`startsWith` should work probably', t => {
     return false
   }
 
-  runParse(t, isDigit)
+  runParseTest(t, isDigit)
 })
 
 test('`oneOf` should work probably', t => {
@@ -37,7 +37,7 @@ test('`oneOf` should work probably', t => {
     return !!cursor.oneOf(digits)
   }
 
-  runParse(t, isDigit)
+  runParseTest(t, isDigit)
 })
 
 test('`lookahead` should work probably', t => {
@@ -47,5 +47,5 @@ test('`lookahead` should work probably', t => {
     return '0' <= char && char <= '9'
   }
 
-  runParse(t, isDigit)
+  runParseTest(t, isDigit)
 })
