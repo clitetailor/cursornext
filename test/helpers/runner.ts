@@ -1,5 +1,6 @@
 import { ExecutionContext } from 'ava'
 import { Cursor, t as cursorTest, CursorMap } from '../../src'
+import { trimNewLine } from './normalize'
 
 export function runParseTest(
   t: ExecutionContext,
@@ -37,7 +38,7 @@ export function runParseTest(
       type: 'Integer',
       value
     })
-    t.is(cursor.index, marker.index)
+    t.is(cursor.index, marker.index, cursor.doc)
   })
 }
 
@@ -47,11 +48,47 @@ export function runLocTest(
   line: number,
   column: number
 ) {
-  const iter = cursorTest.capture(input).iter()
+  const iter = cursorTest.capture(trimNewLine(input)).iter()
   const cursor = iter.next()
 
   const loc = cursor.getLoc()
 
-  t.is(loc.line, line)
-  t.is(loc.column, column)
+  t.is(loc.line, line, cursor.doc)
+  t.is(loc.column, column, cursor.doc)
+}
+
+export function runGetLineTest(
+  t: ExecutionContext,
+  input: string,
+  expected: string
+) {
+  const iter = cursorTest.capture(trimNewLine(input)).iter()
+  const cursor = iter.next()
+
+  const loc = cursor.getLoc()
+
+  const output = Array.from({ length: 3 }, (v, k) => k)
+    .map(i => loc.line - 1 + i)
+    .map(lineNumber => {
+      const line = cursor.getLine(lineNumber)
+
+      return line ? `${lineNumber} | ${line}` : undefined
+    })
+    .filter(line => line)
+    .join('')
+
+  t.is(output, trimNewLine(expected), cursor.doc)
+}
+
+export function runPrintDebugTest(
+  t: ExecutionContext,
+  input: string,
+  expected: string
+) {
+  const iter = cursorTest.capture(trimNewLine(input)).iter()
+  const cursor = iter.next()
+
+  const output = cursor.printDebug()
+
+  t.is(output, trimNewLine(expected), trimNewLine(expected))
 }

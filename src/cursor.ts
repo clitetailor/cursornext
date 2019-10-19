@@ -1,5 +1,5 @@
 import { Loc } from './loc'
-import { Eol } from './eol'
+import { Eol, EolType } from './eol'
 
 export interface CursorStruct {
   doc: string
@@ -48,9 +48,7 @@ export class Cursor {
   }
 
   getLoc(): Loc {
-    if (!this.eols) {
-      this.compute()
-    }
+    this.compute()
 
     const line = (<Eol[]>this.eols).findIndex(
       eol => this.index <= eol.start
@@ -65,33 +63,72 @@ export class Cursor {
     })
   }
 
-  compute() {
-    this.eols = [new Eol(0, 0)]
+  getLine(
+    line: number,
+    includeEol: boolean = true
+  ): string | undefined {
+    this.compute()
 
-    const cursor = new Cursor({
-      doc: this.doc,
-      index: 0
-    })
+    if (line > 0 && line <= this.numberOfLines()) {
+      const start = (<Eol[]>this.eols)[line - 1].end
+      const end = includeEol
+        ? (<Eol[]>this.eols)[line].end
+        : (<Eol[]>this.eols)[line].start
 
-    while (!cursor.isEof()) {
-      if (cursor.startsWith('\r\n')) {
-        this.eols.push(new Eol(cursor.index, cursor.index + 2))
-
-        cursor.next(2)
-      } else if (
-        cursor.startsWith('\r') ||
-        cursor.startsWith('\n')
-      ) {
-        this.eols.push(new Eol(cursor.index, cursor.index + 1))
-        cursor.next(1)
-      } else {
-        cursor.next(1)
-      }
+      return this.doc.substring(start, end)
     }
 
-    this.eols.push(
-      new Eol(cursor.endIndex(), cursor.endIndex())
-    )
+    return
+  }
+
+  numberOfLines(): number {
+    this.compute()
+
+    return (<Eol[]>this.eols).length - 1
+  }
+
+  compute() {
+    if (!this.eols) {
+      this.eols = [new Eol(0, 0)]
+
+      const cursor = new Cursor({
+        doc: this.doc,
+        index: 0
+      })
+
+      while (!cursor.isEof()) {
+        if (cursor.startsWith('\r\n')) {
+          this.eols.push(
+            new Eol(
+              cursor.index,
+              cursor.index + 2,
+              EolType.CRLF
+            )
+          )
+          cursor.next(2)
+        } else if (cursor.startsWith('\r')) {
+          this.eols.push(
+            new Eol(cursor.index, cursor.index + 1, EolType.CR)
+          )
+          cursor.next(1)
+        } else if (cursor.startsWith('\n')) {
+          this.eols.push(
+            new Eol(cursor.index, cursor.index + 1, EolType.LF)
+          )
+          cursor.next(1)
+        } else {
+          cursor.next(1)
+        }
+      }
+
+      this.eols.push(
+        new Eol(
+          cursor.endIndex(),
+          cursor.endIndex(),
+          EolType.EOF
+        )
+      )
+    }
   }
 
   endIndex(): number {
@@ -207,5 +244,42 @@ export class Cursor {
         : cursorOrIndex.index
 
     return this.index === index
+  }
+
+  printDebug(): string {
+    const loc = this.getLoc()
+    const padLength = (loc.line + 1).toString().length
+
+    const lines = []
+
+    for (let i = -1; i < 2; ++i) {
+      const lineNumber = loc.line + i
+      const line = this.getLine(lineNumber)
+
+      if (line) {
+        const outputLine =
+          lineNumber.toString().padStart(padLength) +
+          ' | ' +
+          line
+
+        lines.push(outputLine)
+
+        if (lineNumber === loc.line) {
+          const lastLoc = (<Eol[]>this.eols)[lineNumber]
+
+          const markerLine =
+            (lastLoc.type === EolType.EOF ? EolType.LF : '') +
+            ''.padStart(padLength) +
+            ' | ' +
+            ' '.repeat(loc.column - 1) +
+            '^' +
+            lastLoc.type
+
+          lines.push(markerLine)
+        }
+      }
+    }
+
+    return lines.join('')
   }
 }
