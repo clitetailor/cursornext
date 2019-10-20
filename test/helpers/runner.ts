@@ -30,7 +30,7 @@ export function runParseTest(
 
   values.forEach(value => {
     const cursor = iter.next()
-    const marker = iter.next()
+    const target = iter.next()
 
     const input = parseInteger(cursor)
 
@@ -38,7 +38,7 @@ export function runParseTest(
       type: 'Integer',
       value
     })
-    t.is(cursor.index, marker.index, cursor.doc)
+    t.is(cursor.index, target.index, cursor.doc)
   })
 }
 
