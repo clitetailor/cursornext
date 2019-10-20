@@ -70,7 +70,7 @@ export function runGetLineTest(
   const output = Array.from({ length: 3 }, (v, k) => k)
     .map(i => loc.line - 1 + i)
     .map(lineNumber => {
-      const line = cursor.getLine(lineNumber)
+      const line = cursor.extractLine(lineNumber)
 
       return line ? `${lineNumber} | ${line}` : undefined
     })

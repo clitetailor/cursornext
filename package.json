@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "build": "babel index.ts -o index.js",
-    "format": "prettier -c .prettierrc.yaml --write index.ts",
+    "fmt": "prettier -c .prettierrc.yaml --write index.ts",
     "test": "ava"
   },
   "repository": {

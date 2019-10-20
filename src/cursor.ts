@@ -63,7 +63,7 @@ export class Cursor {
     })
   }
 
-  getLine(
+  extractLine(
     line: number,
     includeEol: boolean = true
   ): string | undefined {
@@ -254,7 +254,7 @@ export class Cursor {
 
     for (let i = -1; i < 2; ++i) {
       const lineNumber = loc.line + i
-      const line = this.getLine(lineNumber)
+      const line = this.extractLine(lineNumber)
 
       if (line) {
         const outputLine =
