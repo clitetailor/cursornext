@@ -1,6 +1,6 @@
 import { ExecutionContext } from 'ava'
-import { Cursor, t as cursorTest, CursorMap } from '../../src'
-import { trimNewLine } from './normalize'
+import { Cursor, t as cursorTest, CursorMap, CaptureResult } from '../../src'
+import { trimNewLine } from '../../src/utils/string'
 
 export function runParseTest(
   t: ExecutionContext,
@@ -91,4 +91,24 @@ export function runPrintDebugTest(
   const output = cursor.printDebug()
 
   t.is(output, trimNewLine(expected), trimNewLine(expected))
+}
+
+export function runCaptureTest(
+  t: ExecutionContext,
+  input: CaptureResult,
+  expected: string
+) {
+  const cursor = input.iter().next()
+
+  t.is(cursor.doc, expected, cursor.doc)
+}
+
+export function runInlineTest(
+  t: ExecutionContext,
+  input: CaptureResult,
+  expected: string
+) {
+  const cursor = input.iter().next()
+
+  t.is(cursor.doc, expected, cursor.doc)
 }

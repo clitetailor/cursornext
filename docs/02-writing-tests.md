@@ -5,17 +5,17 @@ For writing tests, cursornext provide you with the caret syntax. For example:
 ```ts
 import { t } from 'cursornext'
 
-const { cursor, marker } = t.capture(
-  '-----🌵(cursor)1992🌵(marker)------12---86---'
+const { cursor, target } = t.capture(
+  '-----🌵(cursor)1992🌵(target)------12---86---'
 )
 ```
 
-In caret syntax, cursor name is wrapped inside parentheses and prefixed with the `🌵` symbol (which is `Alt + 127797`). The above code will extract two cursors named `cursor` and `marker` from the document and placed them at their respective positions. The following diagram represents the generated document and cursor positions:
+In caret syntax, cursor name is wrapped inside parentheses and prefixed with the `🌵` symbol (which is `Alt + 127797`). The above code will extract two cursors named `cursor` and `target` from the document and placed them at their respective positions. The following diagram represents the generated document and cursor positions:
 
 ```
 1 | -----1992------12---86---
   |      ^   ^
-  |      |   marker
+  |      |   target
   |      cursor
 ```
 
@@ -84,23 +84,23 @@ Given the following caret diagram:
 ```
 1 | -----1992------12---86---
   |      ^   ^
-  |      |   marker
+  |      |   target
   |      cursor
 ```
 
-After running `parseInteger`, the cursor is expected to be moved to the marker position. The caret diagram that describes the result will be:
+After running `parseInteger`, the cursor is expected to be moved to the target position. The caret diagram that describes the result will be:
 
 ```
 1 | -----1992------12---86---
   |          ^
-  |          marker
+  |          target
   |          cursor
 ```
 
 ```ts
 const token = parseInteger(cursor)
 
-t.assert(cursor.isAt(marker))
+t.assert(cursor.isAt(target))
 t.assert(token ? token.value === 1992 : false)
 ```
 
@@ -115,7 +115,7 @@ const iter = t
 
 for (const value in [1992, 12, 86]) {
   const cursor = iter.next()
-  const marker = iter.next()
+  const target = iter.next()
 
   const token = parseInteger(cursor)
 
@@ -136,7 +136,7 @@ const iter = t
 ```
 
 ```ts
-const [cursor, marker] = t
+const [cursor, target] = t
   .capture('-----🌵1992🌵------12---86---', {
     noLabel: true
   })
@@ -147,7 +147,7 @@ const [cursor, marker] = t
 This will remove the ambiguity when working with parentheses:
 
 ```ts
-const [cursor, marker] = t
+const [cursor, target] = t
   .capture('function iter🌵()🌵 { }', {
     noLabel: true
   })

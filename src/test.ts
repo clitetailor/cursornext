@@ -1,5 +1,6 @@
 import { Cursor } from './cursor'
-import { parseLabel } from './utils'
+import { parseLabel } from './utils/label'
+import { trimNewLine } from './utils/string'
 
 export interface CursorTestOptions {
   prefix: string
@@ -53,16 +54,46 @@ export class CaptureIterable {
 }
 
 export class CursorTest {
-  clone(testOptions: CursorTestOptions) {}
+  private options: CursorTestOptions
+
+  constructor(options?: CursorTestOptions) {
+    this.options = options || {
+      prefix: '🌵',
+      noLabel: false
+    }
+  }
+
+  clone(testOptions: CursorTestOptions) {
+    this.options = {
+      ...this.options,
+      ...testOptions
+    }
+  }
 
   capture(
-    caretSyntax: string,
+    input: string,
     testOptions?: CursorTestOptions
   ): CaptureResult {
-    const caretCursor = Cursor.from(caretSyntax)
+    return this.inlineInternal(input, {
+      ...this.options,
+      ...(testOptions || {})
+    })
+  }
+
+  inline(strings: TemplateStringsArray): CaptureResult {
+    return this.inlineInternal(
+      trimNewLine(strings.join('')),
+      this.options
+    )
+  }
+
+  private inlineInternal(
+    input: string,
+    testOptions?: CursorTestOptions
+  ): CaptureResult {
+    const cursor = Cursor.from(input)
 
     let offset = 0
-    let lastIndex = 0
     const indexes: number[] = []
     const names: (string | undefined)[] = []
     const chunks: string[] = []
@@ -74,17 +105,18 @@ export class CursorTest {
     }
     const prefixLen = prefix.length
 
-    while (!caretCursor.isEof()) {
-      if (caretCursor.startsWith(prefix)) {
-        const index = caretCursor.index
+    const marker = cursor.clone()
 
-        indexes.push(index - offset)
-        chunks.push(caretSyntax.substring(lastIndex, index))
+    while (!cursor.isEof()) {
+      if (cursor.startsWith(prefix)) {
+        indexes.push(cursor.index - offset)
+        chunks.push(marker.takeUntil(cursor))
+        marker.moveTo(cursor)
 
-        caretCursor.next(prefixLen)
+        cursor.next(prefixLen)
 
         if (!noLabel) {
-          const name = parseLabel(caretCursor)
+          const name = parseLabel(cursor)
 
           switch (name) {
             case 'iter':
@@ -102,14 +134,14 @@ export class CursorTest {
           names.push(undefined)
         }
 
-        lastIndex = caretCursor.index
-        offset += caretCursor.index - index
+        offset += cursor.index - marker.index
+        marker.moveTo(cursor)
       } else {
-        caretCursor.next(1)
+        cursor.next(1)
       }
     }
 
-    chunks.push(caretSyntax.substring(lastIndex))
+    chunks.push(marker.takeUntil(cursor))
     const doc = chunks.join('')
 
     const cursors = indexes.map(
@@ -136,9 +168,13 @@ export class CursorTest {
         named
           ? new CaptureIterable(cursors)
           : new CaptureIterable(
-              cursors.filter((cursor, index) => !names[index])
+              cursors.filter((_cursor, index) => !names[index])
             )
     }
+  }
+
+  trimNewLine(strings: TemplateStringsArray) {
+    return trimNewLine(strings.join())
   }
 }
 

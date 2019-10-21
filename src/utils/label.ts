@@ -1,4 +1,4 @@
-import { Cursor } from './cursor'
+import { Cursor } from '../cursor'
 
 export function parseLabel(cursor: Cursor): string | undefined {
   if (cursor.startsWith('(')) {
