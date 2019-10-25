@@ -1,6 +1,5 @@
 /node_modules
 /index.js
-/dist
 /.rts2*
 index.umd.js
 index.esm.js
