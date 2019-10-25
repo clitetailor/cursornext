@@ -13,7 +13,8 @@ const config: Config = {
     dir: '.',
     format: ['cjs', 'umd', 'esm'],
     sourceMap: true,
-    sourceMapExcludeSources: true
+    sourceMapExcludeSources: true,
+    moduleName: 'cursornext'
   }
 }
 

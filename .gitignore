@@ -2,6 +2,9 @@
 /index.js
 /dist
 /.rts2*
+index.umd.js
 index.esm.js
 index.js
 *.d.ts
+*.map
+*.js.map
