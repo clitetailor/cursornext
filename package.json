@@ -10,7 +10,7 @@
     "parser"
   ],
   "scripts": {
-    "build": "babel index.ts -o index.js",
+    "build": "bili",
     "fmt": "prettier -c .prettierrc.yaml --write index.ts",
     "test": "ava"
   },
@@ -29,7 +29,9 @@
     "@babel/preset-typescript": "^7.6.0",
     "@types/node": "^12.7.3",
     "ava": "^2.3.0",
+    "bili": "^4.8.1",
     "prettier": "^1.18.2",
+    "rollup-plugin-typescript2": "^0.24.3",
     "ts-node": "^8.3.0",
     "typescript": "^3.6.2"
   },

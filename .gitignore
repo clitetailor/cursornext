@@ -1,2 +1,7 @@
 /node_modules
 /index.js
+/dist
+/.rts2*
+index.esm.js
+index.js
+*.d.ts
