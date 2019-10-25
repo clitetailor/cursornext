@@ -1,6 +1,7 @@
 /.vscode
 /src
 /.rts2*
+/test
 *.d.ts
 babel.config.js
 bili.config.ts
