@@ -158,11 +158,23 @@ export class Cursor {
     this.setIndex(cursor.index)
   }
 
-  next(offset: number) {
+  next(offset: number = 1) {
     if (offset < 1) {
       return
     }
 
+    this.move(offset)
+  }
+
+  previous(offset: number = 1) {
+    if (offset < 1) {
+      return
+    }
+
+    this.move(-offset)
+  }
+
+  move(offset: number) {
     this.setIndex(this.index + offset)
   }
 
