@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "build": "babel index.ts -o index.js",
-    "fmt": "prettier -c .prettierrc.yaml --write index.ts",
+    "format": "prettier -c .prettierrc.yaml --write **/*.{ts,md,yml,yaml,json}",
     "test": "ava"
   },
   "repository": {
@@ -39,6 +39,9 @@
   },
   "homepage": "https://github.com/clitetailor/cursornext#readme",
   "ava": {
+    "require": [
+      "ts-node/register"
+    ],
     "files": [
       "test/**/*.ts",
       "!test/helpers/**/*"
@@ -46,9 +49,6 @@
     "compileEnhancements": false,
     "extensions": [
       "ts"
-    ],
-    "require": [
-      "ts-node/register"
     ],
     "timeout": "2m"
   }

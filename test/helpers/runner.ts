@@ -1,5 +1,9 @@
 import { ExecutionContext } from 'ava'
-import { Cursor, t as cursorTest, CursorMap, CaptureResult } from '../../src'
+import {
+  Cursor,
+  t as cursorTest,
+  CaptureResult
+} from '../../src'
 import { trimNewLine } from '../../src/utils/string'
 
 export function runParseTest(

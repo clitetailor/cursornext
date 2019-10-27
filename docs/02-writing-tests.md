@@ -100,8 +100,8 @@ After running `parseInteger`, the cursor is expected to be moved to the target p
 ```ts
 const token = parseInteger(cursor)
 
-t.assert(cursor.isAt(target))
-t.assert(token ? token.value === 1992 : false)
+assert(cursor.isAt(target))
+assert(token.value, 1992)
 ```
 
 ## Iteration Mode
@@ -119,9 +119,9 @@ for (const value in [1992, 12, 86]) {
 
   const token = parseInteger(cursor)
 
-  t.assert(token !== null)
-  t.assert(token.type === 'Interger'))
-  t.assert(token.value === value)
+  assert(token, null)
+  assert(token.type, 'Interger'))
+  assert(token.value, value)
 }
 ```
 
@@ -175,7 +175,7 @@ This above code will be rendered as:
 ```
 
 ```ts
-t.asserts(captureResult.iter().toArray().length === 4)
+assert(captureResult.iter().toArray().length, 4)
 ```
 
 ### `🌵(symbol)`
@@ -193,5 +193,5 @@ This would render the following diagram:
 ```
 
 ```ts
-t.assert(captureResult.symbol === undefined)
+assert(captureResult.symbol, undefined)
 ```

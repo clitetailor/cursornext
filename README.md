@@ -48,6 +48,7 @@ For more documentation, please checkout the [`docs`](./docs) directory:
 
 - [Parsing Patterns](./docs/01-parsing-patterns.md)
 - [Writing Tests](./docs/02-writing-tests.md)
+- [Error Reporting](./docs/03-error-reporting.md)
 
 ## License
 
