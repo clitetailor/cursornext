@@ -3,8 +3,8 @@ import { parseLabel } from './utils/label'
 import { trimNewLine } from './utils/string'
 
 export interface CursorTestOptions {
-  prefix: string
-  noLabel: boolean
+  prefix?: string
+  noLabel?: boolean
 }
 
 export interface CursorMap {
