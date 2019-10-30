@@ -1,9 +1,12 @@
 /node_modules
-/index.js
-/.rts2*
-index.umd.js
-index.esm.js
-index.js
+
+*.umd.js
+*.esm.js
+*.js
 *.d.ts
 *.map
 *.js.map
+
+!gulpfile.esm.js
+!rollup.config.js
+!babel.config.js
