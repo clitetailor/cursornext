@@ -1,6 +1,5 @@
 import test from 'ava'
 import {
-  CursorMap,
   t as cursorTest,
   CaptureResult
 } from '../src'

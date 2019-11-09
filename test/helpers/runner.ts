@@ -29,7 +29,7 @@ export function runParseTest(
     .capture(
       '-----🌵()1992🌵()------🌵()12🌵()---🌵()86🌵()---'
     )
-    .iter()
+    .toIter()
   const values = [1992, 12, 86]
 
   values.forEach(value => {
@@ -52,7 +52,7 @@ export function runLocTest(
   line: number,
   column: number
 ) {
-  const iter = cursorTest.capture(trimNewLine(input)).iter()
+  const iter = cursorTest.capture(trimNewLine(input)).toIter()
   const cursor = iter.next()
 
   const loc = cursor.getLoc()
@@ -66,7 +66,7 @@ export function runGetLineTest(
   input: string,
   expected: string
 ) {
-  const iter = cursorTest.capture(trimNewLine(input)).iter()
+  const iter = cursorTest.capture(trimNewLine(input)).toIter()
   const cursor = iter.next()
 
   const loc = cursor.getLoc()
@@ -89,7 +89,7 @@ export function runPrintDebugTest(
   input: string,
   expected: string
 ) {
-  const iter = cursorTest.capture(trimNewLine(input)).iter()
+  const iter = cursorTest.capture(trimNewLine(input)).toIter()
   const cursor = iter.next()
 
   const output = cursor.printDebug()
@@ -102,7 +102,7 @@ export function runCaptureTest(
   input: CaptureResult,
   expected: string
 ) {
-  const cursor = input.iter().next()
+  const cursor = input.toIter().next()
 
   t.is(cursor.doc, expected, cursor.doc)
 }
@@ -112,7 +112,7 @@ export function runInlineTest(
   input: CaptureResult,
   expected: string
 ) {
-  const cursor = input.iter().next()
+  const cursor = input.toIter().next()
 
   t.is(cursor.doc, expected, cursor.doc)
 }

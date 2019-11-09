@@ -1,6 +1,6 @@
 import { Cursor } from '../cursor'
 
-export function parseLabel(cursor: Cursor): string | undefined {
+export function parseLabel(cursor: Cursor): string {
   if (cursor.startsWith('(')) {
     cursor.next(1)
     const marker = cursor.clone()
@@ -15,5 +15,5 @@ export function parseLabel(cursor: Cursor): string | undefined {
     return name
   }
 
-  return undefined
+  return ''
 }

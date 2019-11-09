@@ -7,17 +7,77 @@ export interface CursorTestOptions {
   noLabel?: boolean
 }
 
-export interface CursorMap {
+export class CaptureBuffer {
+  constructor(private map: Map<string, number[]> = new Map()) {}
+
+  add(label: string, index: number) {
+    if (!this.map.has(label)) {
+      this.map.set(label, [index])
+    } else {
+      const indexes = <number[]>this.map.get(label)
+
+      indexes.push(index)
+    }
+  }
+
+  toCaptureResult(doc: string) {
+    return new CaptureResult(doc, this.map)
+  }
+}
+
+export class CaptureResult {
+  constructor(
+    private doc: string,
+    private map: Map<string, number[]> = new Map()
+  ) {}
+
+  setDoc(doc: string) {
+    this.doc = doc
+  }
+
+  toMap(): CaptureMap {
+    const result: CaptureMap = {}
+    const map = this.map
+    const doc = this.doc
+
+    for (const label of map.keys()) {
+      const index = (<number[]>map.get(label))
+        .sort()
+        .reverse()[0]
+
+      result[label] = new Cursor({
+        doc,
+        index
+      })
+    }
+
+    return result
+  }
+
+  toIter(): CaptureIterable {
+    let cursors: Cursor[] = []
+    const doc = this.doc
+
+    for (const indexes of this.map.values()) {
+      cursors = cursors.concat(
+        indexes.map(
+          index =>
+            new Cursor({
+              doc,
+              index
+            })
+        )
+      )
+    }
+
+    cursors = cursors.sort((a, b) => a.index - b.index)
+
+    return new CaptureIterable(cursors)
+  }
+}
+
+export interface CaptureMap {
   [name: string]: Cursor
-}
-
-export interface CaptureResult {
-  [name: string]: any
-  iter(options?: Partial<IterableOptions>): CaptureIterable
-}
-
-export interface IterableOptions {
-  named: boolean | undefined
 }
 
 export class CaptureIterable {
@@ -46,10 +106,6 @@ export class CaptureIterable {
           : { value, done: true }
       }
     }
-  }
-
-  toArray() {
-    return this.cursors
   }
 }
 
@@ -94,8 +150,7 @@ export class CursorTest {
     const cursor = Cursor.from(input)
 
     let offset = 0
-    const indexes: number[] = []
-    const names: (string | undefined)[] = []
+    const buffer = new CaptureBuffer()
     const chunks: string[] = []
 
     const { prefix, noLabel } = {
@@ -109,29 +164,29 @@ export class CursorTest {
 
     while (!cursor.isEof()) {
       if (cursor.startsWith(prefix)) {
-        indexes.push(cursor.index - offset)
+        const captureIndex = cursor.index - offset
         chunks.push(marker.takeUntil(cursor))
         marker.moveTo(cursor)
 
         cursor.next(prefixLen)
 
         if (!noLabel) {
-          const name = parseLabel(cursor)
+          const label = parseLabel(cursor)
 
-          switch (name) {
+          switch (label) {
             case 'iter':
             case '':
-              names.push(undefined)
+              buffer.add('', captureIndex)
               break
             case 'symbol':
               chunks.push(prefix)
               break
             default:
-              names.push(name)
+              buffer.add(label, captureIndex)
               break
           }
         } else {
-          names.push(undefined)
+          buffer.add('', captureIndex)
         }
 
         offset += cursor.index - marker.index
@@ -144,33 +199,7 @@ export class CursorTest {
     chunks.push(marker.takeUntil(cursor))
     const doc = chunks.join('')
 
-    const cursors = indexes.map(
-      index => new Cursor({ doc, index })
-    )
-
-    const namedCursors: CursorMap = names.reduce(
-      (target, name, index) => {
-        return name
-          ? {
-              ...target,
-              [name]: new Cursor({ doc, index: indexes[index] })
-            }
-          : target
-      },
-      {}
-    )
-
-    return {
-      ...namedCursors,
-      iter: ({
-        named = false
-      }: Partial<IterableOptions> = {}) =>
-        named
-          ? new CaptureIterable(cursors)
-          : new CaptureIterable(
-              cursors.filter((_cursor, index) => !names[index])
-            )
-    }
+    return buffer.toCaptureResult(doc)
   }
 
   trimNewLine(strings: TemplateStringsArray) {
