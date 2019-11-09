@@ -61,6 +61,7 @@ export const clean = () => {
   return del([
     '**/*.js',
     '**/*.d.ts',
+    '**/*.map',
     '!node_modules',
     '!gulpfile.esm.js',
     '!babel.config.js',
