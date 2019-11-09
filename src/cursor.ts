@@ -158,7 +158,7 @@ export class Cursor {
     this.setIndex(cursor.index)
   }
 
-  next(offset: number = 1) {
+  next(offset: number) {
     if (offset < 1) {
       return
     }
@@ -166,7 +166,7 @@ export class Cursor {
     this.move(offset)
   }
 
-  previous(offset: number = 1) {
+  previous(offset: number) {
     if (offset < 1) {
       return
     }

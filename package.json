@@ -13,7 +13,8 @@
     "build": "gulp clean && gulp build",
     "clean": "gulp clean",
     "format": "prettier -c .prettierrc.yaml --write **/*.{ts,md,yml,yaml,json}",
-    "test": "ava"
+    "test": "ava",
+    "prepublish": "build"
   },
   "repository": {
     "type": "git",

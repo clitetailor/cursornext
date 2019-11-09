@@ -9,35 +9,22 @@ In cursornext, there are four basic functions that we would use frequently:
 
 ## Move
 
-To move the cursor, we can use `move`, `next`, `previous` or `setIndex`.
-
-`move` moves the cursor a number of characters.
-
-`next` is an alias of `move` that ensures that the cursor will only move forward. Default argument for move is 1.
-
-`previous` is an alias of `move` that ensures that the cursor will only move backward. Default argument for move is 1.
+To move the cursor, we can use `next` or `setIndex`. `next` move the cursor a number of characters. By using `next`, we can ensure that the cursor will move forward but not backward:
 
 ```ts
 const cursor = Cursor.from('Hello, World!')
-t.assert(cursor.index === 0)
-
-cursor.move(5)
-t.assert(cursor.index === 5)
-
-cursor.next(-1)
-t.assert(cursor.index === 5)
 
 cursor.next(2)
-t.assert(cursor.index === 7)
+t.assert(cursor.index === 2)
 
-cursor.previous(-1)
-t.assert(cursor.index === 7)
+cursor.next(-1)
+t.assert(cursor.index === 2)
 
-cursor.previous() // default is 1
-t.assert(cursor.index === 6)
+cursor.next(2)
+t.assert(cursor.index === 4)
 ```
 
-`setIndex` method lets you specify exact desired position for cursor:
+Different from `next`, the `setIndex` method don't have the guarantee that `next` method have:
 
 ```ts
 const cursor = Cursor.from('Hello, World!')
@@ -49,7 +36,7 @@ cursor.setIndex(3)
 t.assert(cursor.index === 3)
 ```
 
-It can be very handful when working with regular expression:
+But it can be very handful when working with regular expression:
 
 ```ts
 const cursor = Cursor.from('-----1996-----')

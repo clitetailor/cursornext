@@ -1,7 +1,5 @@
 /node_modules
 
-*.umd.js
-*.esm.js
 *.js
 *.d.ts
 *.map
@@ -10,3 +8,5 @@
 !gulpfile.esm.js
 !rollup.config.js
 !babel.config.js
+
+cursornext-*.tgz
