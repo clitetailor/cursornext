@@ -2,6 +2,12 @@
   "name": "cursornext",
   "version": "0.0.1",
   "main": "index.js",
+  "module": "index.esm.js",
+  "files": [
+    "**/*.js",
+    "**/*.d.ts",
+    "**/*.map"
+  ],
   "author": "clitetailor",
   "license": "MIT",
   "description": "A minimalist framework for parsing",
@@ -14,7 +20,8 @@
     "clean": "gulp clean",
     "format": "prettier -c .prettierrc.yaml --write **/*.{ts,md,yml,yaml,json}",
     "test": "ava",
-    "prepublish": "build"
+    "prepack": "yarn clean && yarn format && yarn test && yarn build",
+    "preversion": "yarn build && yarn clean && yarn format && yarn test"
   },
   "repository": {
     "type": "git",
@@ -35,7 +42,9 @@
     "esm": "^3.2.25",
     "gulp": "^4.0.2",
     "gulp-rename": "^1.4.0",
+    "gulp-sourcemaps": "^2.6.5",
     "gulp-typescript": "^5.0.1",
+    "merge-stream": "^2.0.0",
     "prettier": "^1.18.2",
     "rollup": "^1.26.0",
     "rollup-plugin-typescript2": "^0.24.3",

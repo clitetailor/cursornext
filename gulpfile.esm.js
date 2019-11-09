@@ -2,6 +2,8 @@ import { src, task, dest, series } from 'gulp'
 import ts from 'gulp-typescript'
 import del from 'del'
 import rename from 'gulp-rename'
+import sourcemaps from 'gulp-sourcemaps'
+import merge from 'merge-stream'
 import { rollup } from 'rollup'
 
 import { default as getRollupConfig } from './rollup.config'
@@ -11,9 +13,14 @@ task('build:cjs', () => {
     declaration: true
   })
 
-  return src('src/**/*.ts')
+  const result = src('src/**/*.ts')
+    .pipe(sourcemaps.init())
     .pipe(tsProject())
-    .js.pipe(dest('.'))
+
+  return merge(
+    result.js.pipe(sourcemaps.write('.')).pipe(dest('.')),
+    result.dts.pipe(dest('.'))
+  )
 })
 
 task('build:umd', async () => {

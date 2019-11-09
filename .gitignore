@@ -3,7 +3,6 @@
 *.js
 *.d.ts
 *.map
-*.js.map
 
 !gulpfile.esm.js
 !rollup.config.js
