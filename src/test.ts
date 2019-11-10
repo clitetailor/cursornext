@@ -1,6 +1,5 @@
 import { Cursor } from './cursor'
 import { parseLabel } from './utils/label'
-import { trimNewLine } from './utils/string'
 
 export interface CursorTestOptions {
   prefix?: string
@@ -8,43 +7,29 @@ export interface CursorTestOptions {
 }
 
 export class CaptureBuffer {
-  constructor(private map: Map<string, number[]> = new Map()) {}
+  indexes: [string, number][] = []
 
   add(label: string, index: number) {
-    if (!this.map.has(label)) {
-      this.map.set(label, [index])
-    } else {
-      const indexes = <number[]>this.map.get(label)
-
-      indexes.push(index)
-    }
+    this.indexes.push([label, index])
   }
 
   toCaptureResult(doc: string) {
-    return new CaptureResult(doc, this.map)
+    return new CaptureResult(doc, this.indexes)
   }
 }
 
 export class CaptureResult {
   constructor(
     private doc: string,
-    private map: Map<string, number[]> = new Map()
+    private indexes: [string, number][] = []
   ) {}
-
-  setDoc(doc: string) {
-    this.doc = doc
-  }
 
   toMap(): CaptureMap {
     const result: CaptureMap = {}
-    const map = this.map
+    const indexes = this.indexes
     const doc = this.doc
 
-    for (const label of map.keys()) {
-      const index = (<number[]>map.get(label))
-        .sort()
-        .reverse()[0]
-
+    for (const [label, index] of indexes) {
       result[label] = new Cursor({
         doc,
         index
@@ -54,25 +39,68 @@ export class CaptureResult {
     return result
   }
 
-  toIter(): CaptureIterable {
-    let cursors: Cursor[] = []
+  toArray(): Cursor[] {
     const doc = this.doc
 
-    for (const indexes of this.map.values()) {
-      cursors = cursors.concat(
-        indexes.map(
-          index =>
-            new Cursor({
-              doc,
-              index
-            })
-        )
+    return this.indexes.map(
+      ([label, index]) =>
+        new Cursor({
+          doc,
+          index
+        })
+    )
+  }
+
+  toIter(): CaptureIterable {
+    const cursors: Cursor[] = []
+    const doc = this.doc
+    const indexes = this.indexes
+
+    for (const [label, index] of indexes) {
+      cursors.push(
+        new Cursor({
+          doc,
+          index
+        })
       )
     }
 
-    cursors = cursors.sort((a, b) => a.index - b.index)
-
     return new CaptureIterable(cursors)
+  }
+
+  toPairs(): CapturePair[] {
+    const pairs: CapturePair[] = []
+    const indexes = this.indexes
+    const doc = this.doc
+
+    const stack: [string, number][] = []
+
+    for (const [label, endIndex] of indexes) {
+      const index = stack.findIndex(item => item[0] === label)
+
+      if (index !== -1) {
+        const [_, startIndex] = stack.splice(index, 1)[0]
+
+        const start = new Cursor({
+          doc,
+          index: startIndex
+        })
+        const end = new Cursor({
+          doc,
+          index: endIndex
+        })
+
+        pairs.push({
+          label,
+          start,
+          end
+        })
+      } else {
+        stack.unshift([label, endIndex])
+      }
+    }
+
+    return pairs
   }
 }
 
@@ -109,6 +137,12 @@ export class CaptureIterable {
   }
 }
 
+export interface CapturePair {
+  label: string
+  start: Cursor
+  end: Cursor
+}
+
 export class CursorTest {
   private options: CursorTestOptions
 
@@ -130,20 +164,20 @@ export class CursorTest {
     input: string,
     testOptions?: CursorTestOptions
   ): CaptureResult {
-    return this.inlineInternal(input, {
+    return this._inline(input, {
       ...this.options,
       ...(testOptions || {})
     })
   }
 
-  inline(strings: TemplateStringsArray): CaptureResult {
-    return this.inlineInternal(
-      trimNewLine(strings.join('')),
-      this.options
-    )
+  inline(
+    input: string,
+    testOptions?: CursorTestOptions
+  ): CaptureResult {
+    return this._inline(this.trim(input), testOptions)
   }
 
-  private inlineInternal(
+  private _inline(
     input: string,
     testOptions?: CursorTestOptions
   ): CaptureResult {
@@ -176,7 +210,7 @@ export class CursorTest {
           switch (label) {
             case 'iter':
             case '':
-              buffer.add('', captureIndex)
+              buffer.add('none', captureIndex)
               break
             case 'symbol':
               chunks.push(prefix)
@@ -186,7 +220,7 @@ export class CursorTest {
               break
           }
         } else {
-          buffer.add('', captureIndex)
+          buffer.add('none', captureIndex)
         }
 
         offset += cursor.index - marker.index
@@ -202,8 +236,10 @@ export class CursorTest {
     return buffer.toCaptureResult(doc)
   }
 
-  trimNewLine(strings: TemplateStringsArray) {
-    return trimNewLine(strings.join())
+  trim(input: string) {
+    return input
+      .replace(/^[ \t]*?\r?\n/, '')
+      .replace(/\r?\n[ \t]*?$/, '')
   }
 }
 
