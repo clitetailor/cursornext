@@ -9,10 +9,10 @@ export function parseLabel(cursor: Cursor): string {
       cursor.next(1)
     }
 
-    const name = marker.takeUntil(cursor)
+    const label = marker.takeUntil(cursor)
     cursor.next(1)
 
-    return name
+    return label
   }
 
   return ''

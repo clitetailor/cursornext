@@ -105,7 +105,7 @@ export class CaptureResult {
 }
 
 export interface CaptureMap {
-  [name: string]: Cursor
+  [label: string]: Cursor
 }
 
 export class CaptureIterable {

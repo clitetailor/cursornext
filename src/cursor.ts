@@ -258,7 +258,7 @@ export class Cursor {
     return this.index === index
   }
 
-  printDebug(name?: string): string {
+  printDebug(label?: string): string {
     const loc = this.getLoc()
     const padLength = (loc.line + 1).toString().length
 
@@ -285,12 +285,12 @@ export class Cursor {
             ' | ' +
             ' '.repeat(loc.column - 1) +
             '^' +
-            (name
+            (label
               ? EolType.LF +
                 ''.padStart(padLength) +
                 ' | ' +
                 ' '.repeat(loc.column - 1) +
-                name
+                label
               : '') +
             lastLoc.type
 
@@ -302,7 +302,7 @@ export class Cursor {
     return lines.join('')
   }
 
-  debug(name?: string) {
-    console.log(this.printDebug(name) + '\n')
+  debug(label?: string) {
+    console.log(this.printDebug(label) + '\n')
   }
 }
