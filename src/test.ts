@@ -75,28 +75,35 @@ export class CaptureResult {
 
     const stack: [string, number][] = []
 
-    for (const [label, endIndex] of indexes) {
-      const index = stack.findIndex(item => item[0] === label)
+    for (const [label, index] of indexes) {
+      if (stack.length) {
+        const [lastLabel, lastIndex] = stack[stack.length - 1]
 
-      if (index !== -1) {
-        const [_, startIndex] = stack.splice(index, 1)[0]
-
-        const start = new Cursor({
-          doc,
-          index: startIndex
-        })
-        const end = new Cursor({
-          doc,
-          index: endIndex
-        })
-
-        pairs.push({
-          label,
-          start,
-          end
-        })
+        if (label === lastLabel) {
+          const startIndex = lastIndex
+          const endIndex = index
+  
+          const start = new Cursor({
+            doc,
+            index: startIndex
+          })
+          const end = new Cursor({
+            doc,
+            index: endIndex
+          })
+  
+          pairs.push({
+            label,
+            start,
+            end
+          })
+  
+          stack.pop()
+        } else {
+          stack.push([label, index])
+        }
       } else {
-        stack.unshift([label, endIndex])
+        stack.push([label, index])
       }
     }
 
