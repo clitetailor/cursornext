@@ -144,7 +144,7 @@ export class Cursor {
     this.index = index
 
     if (this.index < 0) {
-      return 0
+      return
     }
 
     const endIndex = this.endIndex()

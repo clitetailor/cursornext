@@ -50,7 +50,7 @@ test('`exec` should work probably', t => {
 })
 
 test('`startsWith` should work probably', t => {
-  const digits = Array.from({ length: 10 }, (v, k) =>
+  const digits = Array.from({ length: 10 }, (_v, k) =>
     k.toString()
   )
 
@@ -68,7 +68,7 @@ test('`startsWith` should work probably', t => {
 })
 
 test('`oneOf` should work probably', t => {
-  const digits = Array.from({ length: 10 }, (v, k) =>
+  const digits = Array.from({ length: 10 }, (_v, k) =>
     k.toString()
   )
 

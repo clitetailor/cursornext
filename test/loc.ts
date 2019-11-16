@@ -50,7 +50,7 @@ export function getLineTest(
 
   const loc = cursor.getLoc()
 
-  const output = Array.from({ length: 3 }, (v, k) => k)
+  const output = Array.from({ length: 3 }, (_v, k) => k)
     .map(i => loc.line - 1 + i)
     .map(lineNumber => {
       const line = cursor.extractLine(lineNumber)

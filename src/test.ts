@@ -43,7 +43,7 @@ export class CaptureResult {
     const doc = this.doc
 
     return this.indexes.map(
-      ([label, index]) =>
+      ([, index]) =>
         new Cursor({
           doc,
           index
@@ -56,7 +56,7 @@ export class CaptureResult {
     const doc = this.doc
     const indexes = this.indexes
 
-    for (const [label, index] of indexes) {
+    for (const [, index] of indexes) {
       cursors.push(
         new Cursor({
           doc,
@@ -82,7 +82,7 @@ export class CaptureResult {
         if (label === lastLabel) {
           const startIndex = lastIndex
           const endIndex = index
-  
+
           const start = new Cursor({
             doc,
             index: startIndex
@@ -91,13 +91,13 @@ export class CaptureResult {
             doc,
             index: endIndex
           })
-  
+
           pairs.push({
             label,
             start,
             end
           })
-  
+
           stack.pop()
         } else {
           stack.push([label, index])
@@ -151,20 +151,27 @@ export interface CapturePair {
 }
 
 export class CursorTest {
-  private options: CursorTestOptions
+  private _options: CursorTestOptions
 
   constructor(options?: CursorTestOptions) {
-    this.options = options || {
+    this._options = options || {
       prefix: '🌵',
       noLabel: false
     }
   }
 
-  clone(testOptions: CursorTestOptions) {
-    this.options = {
-      ...this.options,
+  config(testOptions: CursorTestOptions) {
+    this._options = {
+      ...this._options,
       ...testOptions
     }
+  }
+
+  options(testOptions: CursorTestOptions) {
+    return new CursorTest({
+      ...this._options,
+      ...testOptions
+    })
   }
 
   capture(
@@ -172,7 +179,7 @@ export class CursorTest {
     testOptions?: CursorTestOptions
   ): CaptureResult {
     return this._inline(input, {
-      ...this.options,
+      ...this._options,
       ...(testOptions || {})
     })
   }
