@@ -8,6 +8,8 @@ import { rollup } from 'rollup'
 
 import { default as getRollupConfig } from './rollup.config'
 
+const reporter = ts.reporter.fullReporter(true)
+
 task('build:cjs', () => {
   const tsProject = ts.createProject('tsconfig.json', {
     declaration: true
@@ -15,7 +17,7 @@ task('build:cjs', () => {
 
   const result = src('src/**/*.ts')
     .pipe(sourcemaps.init())
-    .pipe(tsProject())
+    .pipe(tsProject(reporter))
 
   return merge(
     result.js.pipe(sourcemaps.write('.')).pipe(dest('.')),
@@ -42,7 +44,7 @@ task('build:esm', () => {
   })
 
   return src('src/**/*.ts')
-    .pipe(tsProject())
+    .pipe(tsProject(reporter))
     .js.pipe(
       rename({
         suffix: '.esm'

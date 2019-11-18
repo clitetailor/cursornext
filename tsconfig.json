@@ -2,19 +2,18 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "strict": true,
     "esModuleInterop": true,
     "downlevelIteration": true,
+    "alwaysStrict": true,
+    "strict": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
-    "alwaysStrict": true,
+    "strictPropertyInitialization": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "diagnostics": true,
-    "strictPropertyInitialization": true
+    "noFallthroughCasesInSwitch": true
   }
 }
