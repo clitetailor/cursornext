@@ -14,7 +14,10 @@ export class CaptureBuffer {
   }
 
   toCaptureResult(doc: string) {
-    return new CaptureResult(doc, this.indexes)
+    return new CaptureResult(
+      doc,
+      this.indexes.sort((a, b) => a[1] - b[1])
+    )
   }
 }
 
@@ -74,36 +77,67 @@ export class CaptureResult {
     const doc = this.doc
 
     const stack: [string, number][] = []
+    const list: [string, number][] = []
 
     for (const [label, index] of indexes) {
-      if (stack.length) {
-        const [lastLabel, lastIndex] = stack[stack.length - 1]
+      const matchResult = label.match(/(start|end)\s*\((.*)\)/)
 
-        if (label === lastLabel) {
-          const startIndex = lastIndex
-          const endIndex = index
+      if (matchResult) {
+        const [, prefix, label] = matchResult
 
-          const start = new Cursor({
-            doc,
-            index: startIndex
-          })
-          const end = new Cursor({
-            doc,
-            index: endIndex
-          })
+        if (prefix === 'start') {
+          list.unshift([label, index])
+        } else {
+          const itemIndex = list.findIndex(
+            ([lastLabel]) => lastLabel === label
+          )
 
-          pairs.push({
-            label,
-            start,
-            end
-          })
+          if (itemIndex !== -1) {
+            const [[, lastIndex]] = list.splice(itemIndex, 1)
 
-          stack.pop()
+            const start = new Cursor({
+              doc,
+              index: lastIndex
+            })
+            const end = new Cursor({
+              doc,
+              index
+            })
+
+            pairs.push({
+              label,
+              start,
+              end
+            })
+          }
+        }
+      } else {
+        if (stack.length) {
+          const [lastLabel, lastIndex] = stack[stack.length - 1]
+
+          if (label === lastLabel) {
+            const start = new Cursor({
+              doc,
+              index: lastIndex
+            })
+            const end = new Cursor({
+              doc,
+              index
+            })
+
+            pairs.push({
+              label,
+              start,
+              end
+            })
+
+            stack.pop()
+          } else {
+            stack.push([label, index])
+          }
         } else {
           stack.push([label, index])
         }
-      } else {
-        stack.push([label, index])
       }
     }
 
@@ -248,6 +282,55 @@ export class CursorTest {
     const doc = chunks.join('')
 
     return buffer.toCaptureResult(doc)
+  }
+
+  block(
+    input: string,
+    _testOptions: CursorTestOptions = {}
+  ): CaptureResult {
+    const cursor = Cursor.from(input)
+    const chunks = []
+
+    const buffer = new CaptureBuffer()
+    let offset = 0
+    let lineLen = 0
+
+    while (!cursor.isEof()) {
+      const regexpArray = cursor.exec(
+        /^[ \t]*([0-9]+)?[ \t]*\|[ \t](.*?)$/m
+      )
+
+      if (regexpArray) {
+        const lineNumber = regexpArray[1]
+        const line = regexpArray[2] + '\n'
+
+        if (lineNumber) {
+          offset += lineLen
+
+          chunks.push(line)
+          lineLen = line.length
+        } else {
+          if (!line.match(/\s*\^/)) {
+            const matchResult = line.match(/([\s|]*)(.*)/)
+
+            if (matchResult) {
+              const index = offset + matchResult[1].length
+              const label = matchResult[2].trim()
+
+              buffer.add(label, index)
+            }
+          }
+        }
+
+        cursor.setIndex(
+          regexpArray.index + regexpArray[0].length
+        )
+      } else {
+        cursor.next(1)
+      }
+    }
+
+    return buffer.toCaptureResult(chunks.join(''))
   }
 
   trim(input: string) {

@@ -14,6 +14,10 @@ export type CursorLike =
     }
   | string
 
+export interface CursorPrintOptions {
+  label?: string
+}
+
 export class Cursor {
   eols?: Eol[]
   doc: string
@@ -201,22 +205,29 @@ export class Cursor {
     return undefined
   }
 
-  exec(input: RegExp | string): RegExpExecArray | null {
+  exec(
+    input: RegExp | string,
+    flags: string = ''
+  ): RegExpExecArray | null {
     const regExp = new RegExp(input)
 
-    const flags = regExp.flags
-    const hat = regExp.source[0] === '^'
+    const head = flags.indexOf('h') !== -1
+    const regExpFlags =
+      regExp.flags +
+      Array.from(flags + 'g')
+        .filter(
+          flag =>
+            flag !== 'h' && regExp.flags.indexOf(flag) === -1
+        )
+        .join('')
 
-    const newRegExp = new RegExp(
-      hat ? regExp.source.substring(1) : regExp,
-      flags.indexOf('g') === -1 ? flags + 'g' : flags
-    )
+    const newRegExp = new RegExp(regExp.source, regExpFlags)
 
     newRegExp.lastIndex = this.index
 
     const execArr = newRegExp.exec(this.doc)
 
-    return hat && execArr && execArr.index !== this.index
+    return head && execArr?.index !== this.index
       ? null
       : execArr
   }
@@ -258,7 +269,7 @@ export class Cursor {
     return this.index === index
   }
 
-  printDebug(label?: string): string {
+  printDebug({ label }: CursorPrintOptions): string {
     const loc = this.getLoc()
     const padLength = (loc.line + 1).toString().length
 
@@ -300,9 +311,5 @@ export class Cursor {
     }
 
     return lines.join('')
-  }
-
-  debug(label?: string) {
-    console.log(this.printDebug(label) + '\n')
   }
 }

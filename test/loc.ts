@@ -4,8 +4,10 @@ import { t as tt } from '../src'
 export function locTest(
   t: ExecutionContext,
   input: string,
-  line: number,
-  column: number
+  expected: {
+    line: number
+    column: number
+  }
 ) {
   const cursor = tt
     .capture(input)
@@ -14,31 +16,32 @@ export function locTest(
 
   const loc = cursor.getLoc()
 
-  t.is(loc.line, line, cursor.doc)
-  t.is(loc.column, column, cursor.doc)
+  t.is(loc.line, expected.line, cursor.doc)
+  t.is(loc.column, expected.column, cursor.doc)
 }
 
 test('`getLoc` should work probably', t => {
-  locTest(
-    t,
-    tt.trim(`
-Hello, World!
-This is an example 🌵\`getLoc\` test.
-    `),
-    2,
-    20
-  )
-  locTest(
-    t,
-    tt.trim(`
-The following loc should refer to line 1 and column 56.🌵
-    `),
-    1,
-    56
-  )
+  const firstDoc = tt.trim(`
+    Hello, World!
+    This is an example 🌵\`getLoc\` test.
+  `)
+
+  locTest(t, firstDoc, {
+    line: 2,
+    column: 24
+  })
+
+  const secondDoc = tt.trim(`
+    The following loc should refer to line 1 and column 56.🌵
+  `)
+
+  locTest(t, secondDoc, {
+    line: 1,
+    column: 60
+  })
 })
 
-export function getLineTest(
+export function extractLineTest(
   t: ExecutionContext,
   input: string,
   expected: string
@@ -63,20 +66,20 @@ export function getLineTest(
   t.is(output, expected, cursor.doc)
 }
 
-test('`getLine` should work probably', t => {
-  getLineTest(
-    t,
-    tt.trim(`
+test('`extractLine` should work probably', t => {
+  const doc = tt.trim(`
 
 
-Hello, World!
-This is an example 🌵\`getLoc\` test.
-    `),
-    tt.trim(`
-3 | Hello, World!
-4 | This is an example \`getLoc\` test.
-    `)
-  )
+    Hello, World!
+    This is an example 🌵\`getLoc\` test.
+  `)
+
+  const extractedLine = tt.trim(`
+3 |     Hello, World!
+4 |     This is an example \`getLoc\` test.
+  `)
+
+  extractLineTest(t, doc, extractedLine)
 })
 
 export function printDebugTest(
@@ -95,18 +98,18 @@ export function printDebugTest(
 }
 
 test('`printDebug` should work probably', t => {
-  printDebugTest(
-    t,
-    tt.trim(`
+  const doc = tt.trim(`
 
 
-Hello, World!
-This is an example 🌵\`getLoc\` test.
-    `),
-    tt.trim(`
-3 | Hello, World!
-4 | This is an example \`getLoc\` test.
-  |                    ^
-    `)
-  )
+    Hello, World!
+    This is an example 🌵\`getLoc\` test.
+  `)
+
+  const debugMsg = tt.trim(`
+3 |     Hello, World!
+4 |     This is an example \`getLoc\` test.
+  |                        ^
+  `)
+
+  printDebugTest(t, doc, debugMsg)
 })

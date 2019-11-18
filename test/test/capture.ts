@@ -1,5 +1,5 @@
 import test, { ExecutionContext } from 'ava'
-import { t as tt, CapturePair } from '../../src'
+import { t as tt, CaptureResult } from '../../src'
 
 function toIterTest(
   t: ExecutionContext,
@@ -14,90 +14,67 @@ function toIterTest(
 }
 
 test('`toIter` should works probably', t => {
-  toIterTest(
-    t,
-    `
+  const captureResult = `
     🌵test🌵
-    `,
-    'test'
-  )
+  `
+
+  toIterTest(t, captureResult, 'test')
 })
 
 export function toMapTest(
   t: ExecutionContext,
-  input: string,
+  input: CaptureResult,
   expected: string
 ) {
-  const [start, end] = tt.capture(input).toArray()
+  const [start, end] = input.toArray()
 
   t.is(start.takeUntil(end), expected)
 }
 
 test('`toMap` should works probably', t => {
-  toMapTest(
-    t,
-    `
+  const captureResult = tt.capture(`
     🌵(start)test🌵(end)
-    `,
-    'test'
-  )
+  `)
+
+  toMapTest(t, captureResult, 'test')
 })
 
 export function toArrayTest(
   t: ExecutionContext,
-  input: string,
+  input: CaptureResult,
   expected: string
 ) {
-  const [start, end] = tt.capture(input).toArray()
+  const [start, end] = input.toArray()
 
   t.is(start.takeUntil(end), expected)
 }
 
 test('`toArray` should works probably', t => {
-  toArrayTest(
-    t,
-    `
+  const captureResult = tt.capture(`
     🌵test🌵
-    `,
-    'test'
-  )
+  `)
+
+  toArrayTest(t, captureResult, 'test')
 })
 
 export function toPairsTest(
   t: ExecutionContext,
-  input: string,
-  count: number,
-  callback: (pair: CapturePair) => void
+  input: CaptureResult,
+  expected: { [label: string]: string }
 ) {
-  const pairs = tt.inline(input).toPairs()
-
-  t.is(pairs.length, count)
-
-  pairs.forEach(callback)
+  input.toPairs().forEach(({ label, start, end }) => {
+    t.is(start.takeUntil(end), expected[label])
+  })
 }
 
 test('`toPairs()` should works probably', t => {
-  toPairsTest(
-    t,
-    `
-    🌵(pair)🌵(key)a🌵(key) = 🌵(value)5🌵(value)🌵(pair)
-    `,
-    3,
-    ({ label, start, end }) => {
-      switch (label) {
-        case 'pair':
-          t.is(start.takeUntil(end), 'a = 5')
+  const captureResult = tt.capture(`
+    🌵(field)🌵(key)a🌵(key) = 🌵(value)5🌵(value)🌵(field)
+  `)
 
-          break
-        case 'key':
-          t.is(start.takeUntil(end), 'a')
-
-          break
-        case 'value':
-          t.is(start.takeUntil(end), '5')
-
-          break
-      }
-    }
-  )
+  toPairsTest(t, captureResult, {
+    field: 'a = 5',
+    key: 'a',
+    value: '5'
+  })
 })
