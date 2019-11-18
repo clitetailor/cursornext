@@ -269,7 +269,7 @@ export class Cursor {
     return this.index === index
   }
 
-  printDebug({ label }: CursorPrintOptions): string {
+  printDebug({ label }: CursorPrintOptions = {}): string {
     const loc = this.getLoc()
     const padLength = (loc.line + 1).toString().length
 
