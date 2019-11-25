@@ -43,7 +43,7 @@ export function parseTest(
 
 test('`exec` should work probably', t => {
   function isDigit(cursor: Cursor): boolean {
-    return !!cursor.exec(/[0-9]/, 'h')
+    return !!cursor.exec(/[0-9]/y)
   }
 
   parseTest(t, isDigit)

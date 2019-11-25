@@ -1,5 +1,5 @@
 import test, { ExecutionContext } from 'ava'
-import { t as tt } from '../src'
+import { t as tt, EolType } from '../src'
 
 export function locTest(
   t: ExecutionContext,
@@ -80,6 +80,32 @@ test('`extractLine` should work probably', t => {
   `)
 
   extractLineTest(t, doc, extractedLine)
+})
+
+export function extractEolTest(
+  t: ExecutionContext,
+  input: string,
+  expected: EolType
+) {
+  const cursor = tt
+    .capture(input)
+    .toIter()
+    .next()
+
+  const loc = cursor?.getLoc()
+  const eol = cursor?.extractEol(loc.line)
+
+  t.is(eol?.type, expected)
+}
+
+test('`extractEol` should work probably', t => {
+  const doc = `
+    Hello, World! 🌵(cursor)
+  `
+    .split(/\r?\n/)
+    .join('\n')
+
+  extractEolTest(t, doc, EolType.LF)
 })
 
 export function printDebugTest(

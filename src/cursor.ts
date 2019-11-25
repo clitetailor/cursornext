@@ -85,6 +85,12 @@ export class Cursor {
     return
   }
 
+  extractEol(line: number): Eol | undefined {
+    this.compute()
+
+    return (<Eol[]>this.eols)[line - 1]
+  }
+
   numberOfLines(): number {
     this.compute()
 
@@ -205,31 +211,19 @@ export class Cursor {
     return undefined
   }
 
-  exec(
-    input: RegExp | string,
-    flags: string = ''
-  ): RegExpExecArray | null {
+  exec(input: RegExp | string): RegExpExecArray | null {
     const regExp = new RegExp(input)
 
-    const head = flags.indexOf('h') !== -1
     const regExpFlags =
-      regExp.flags +
-      Array.from(flags + 'g')
-        .filter(
-          flag =>
-            flag !== 'h' && regExp.flags.indexOf(flag) === -1
-        )
-        .join('')
+      regExp.flags.indexOf('g') !== -1
+        ? regExp.flags
+        : regExp.flags + 'g'
 
     const newRegExp = new RegExp(regExp.source, regExpFlags)
 
     newRegExp.lastIndex = this.index
 
-    const execArr = newRegExp.exec(this.doc)
-
-    return head && execArr?.index !== this.index
-      ? null
-      : execArr
+    return newRegExp.exec(this.doc)
   }
 
   isEof(): boolean {
