@@ -1,28 +1,12 @@
-# Error Reporting
+# Loc
 
-When parsing, the input document may contains both syntax and semantic errors. Creating a meaningful error message can give a clear explanation about what the error is and where the error happens. The following are methods that can helps you to build a meaningful error message format.
+Manually working with line and column number can be complex and inefficent. Loc API provides methods to make working with lines and columns easier and much more expressive.
 
 ## Methods
 
-### `getLoc`
+### `getLoc()`
 
-Loc is a data structure represents cursor position including line, column and current index. `getLoc` extracts the cursor position and returns the corresponding `Loc` item:
-
-```ts
-const { cursor } = t.capture(`
-  Hello, World! 🌵(cursor)
-`)
-
-const loc = cursor.getLoc()
-
-assert(loc.line, 2)
-assert(loc.column, 17)
-assert(loc.index, 18)
-```
-
-### `extractLine`
-
-`extractLine` takes an input line number and returns the corresponding line from the document:
+Get the information about current cursor location.
 
 ```ts
 const { cursor } = t.capture(`
@@ -31,16 +15,43 @@ const { cursor } = t.capture(`
 
 const loc = cursor.getLoc()
 
-assert(cursor.extractLine(loc.line), '  Hello, World! \n')
+t.is(loc.line, 2)
+t.is(loc.column, 17)
+t.is(loc.index, 18)
 ```
 
-By default, `extractLine` will include the line ending character. You can exclude the character by setting the second parameter to false.
+### `extractLine()`
+
+Extracts a specific line.
 
 ```ts
-cursor.extractLine(loc.line, false)
+const { cursor } = t.capture(`
+  Hello, World! 🌵(cursor)
+`)
+
+const loc = cursor.getLoc()
+
+t.is(cursor.extractLine(loc.line), '  Hello, World! ')
 ```
 
-## Print the error message
+By default, `extractLine()` will not include the line ending characters. You can change the behavior by setting the second parameter to `true`.
+
+```ts
+cursor.extractLine(loc.line, true)
+```
+
+### `extracEol()`
+
+Extracts the eol characters of a specific line.
+
+```ts
+const loc = cursor.getLoc()
+const eol = cursor.extractEol(loc.line)
+
+t.is(eol.type, EolType.LF)
+```
+
+## Building the error message using Loc API
 
 An error message often consists of four parts:
 
@@ -52,13 +63,14 @@ An error message often consists of four parts:
 For example:
 
 ```
- 9 | a=5  b=6  c=7
-10 | a=1  b=2  c
-   |            ^ equal sign expected here!
-11 |
+ 9 |   "version": "0.0.1",
+10 |   "main": ...,
+   |           ^ Value expected
+   |
+11 |   "module": "index.mjs",
 ```
 
-To get the error line and the surrounding lines, we get the line number by using `getLoc`, then extract the line using `extractLine`.
+To get the error line and the surrounding lines, we get the line number by using `getLoc()`, then extract the line using `extractLine()`.
 
 ```ts
 const loc = cursor.getLoc()
@@ -73,7 +85,7 @@ for (let i = loc.line - 1; i <= loc + 1; ++i) {
 const message = lines.join('')
 ```
 
-The margin size is often larger than the size of the line numbers. To align the line numbers, we can pad them to the length of the largest one.
+To align the line numbers, we need to pad the line numbers to the length of the largest line number.
 
 ```ts
 const padLength = (loc.line + 1).toString().length

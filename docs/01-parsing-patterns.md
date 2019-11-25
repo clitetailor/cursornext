@@ -1,6 +1,6 @@
 # Parsing Patterns
 
-In cursornext, there are four basic functions that we would use frequently:
+A cursor provides general interfaces to interact with the document. There are four basic functions that a cursor can perform:
 
 - Move
 - Test
@@ -9,34 +9,36 @@ In cursornext, there are four basic functions that we would use frequently:
 
 ## Move
 
-To move the cursor, we can use `next` or `setIndex`. `next` move the cursor a number of characters. By using `next`, we can ensure that the cursor will move forward but not backward:
+To move a cursor, we can use `next()` or `setIndex()`.
+
+`next()` moves the cursor a number of characters. By using `next()`, we can ensure that the cursor will move forward only:
 
 ```ts
 const cursor = Cursor.from('Hello, World!')
 
 cursor.next(2)
-t.assert(cursor.index === 2)
+t.is(cursor.index, 2)
 
 cursor.next(-1)
-t.assert(cursor.index === 2)
+t.is(cursor.index, 2)
 
 cursor.next(2)
-t.assert(cursor.index === 4)
+t.is(cursor.index, 4)
 ```
 
-Different from `next`, the `setIndex` method don't have the guarantee that `next` method have:
+`setIndex()` moves the cursor by setting its index directly.
 
 ```ts
 const cursor = Cursor.from('Hello, World!')
 
 cursor.setIndex(5)
-t.assert(cursor.index === 5)
+t.is(cursor.index, 5)
 
 cursor.setIndex(3)
-t.assert(cursor.index === 3)
+t.is(cursor.index, 3)
 ```
 
-But it can be very handful when working with regular expression:
+This can be very helpful when working with regular expression:
 
 ```ts
 const cursor = Cursor.from('-----1996-----')
@@ -44,18 +46,18 @@ const cursor = Cursor.from('-----1996-----')
 const regexResult = cursor.exec(/[0-9]/)
 cursor.setIndex(regexResult.index)
 
-t.assert(cursor.startsWith('1996'))
+t.true(cursor.startsWith('1996'))
 ```
 
 ## Test
 
 In cursornext, there are three methods that we can use to test a cursor:
 
-- `startsWith`
-- `oneOf`
-- `exec`
+- `startsWith()`
+- `oneOf()`
+- `exec()`
 
-`startsWith` takes an input string and test whether text beginning at the cursor position starts with that given string. For example:
+`startsWith()` takes an input string and tests whether the document at the cursor position starts with that string. For example:
 
 ```
 1 | Hello, World!
@@ -64,10 +66,10 @@ In cursornext, there are three methods that we can use to test a cursor:
 ```
 
 ```ts
-t.assert(cursor.startsWith('World'))
+t.true(cursor.startsWith('World'))
 ```
 
-`oneOf` is similar to `startsWith` except that it tests against multiple of strings. If the text beginning at the cursor position starts with any of these, it returns the first string that matches. Otherwise, it returns `null`.
+`oneOf()` is similar to `startsWith()` except that it tests the cursor against multiple strings. If the document at the cursor position starts with any of these input strings, it would return the first string that matches. Otherwise, it would returns `null`.
 
 ```
 1 | ----abcd-----
@@ -76,11 +78,11 @@ t.assert(cursor.startsWith('World'))
 ```
 
 ```ts
-t.assert(cursor.oneOf(['bcd', 'cad', 'ab', 'abcd']) === 'ab')
-t.assert(cursor.oneOf(['bca', 'bcd']) === null)
+t.is(cursor.oneOf(['bcd', 'cad', 'ab', 'abcd']), 'ab')
+t.is(cursor.oneOf(['bca', 'bcd']), null)
 ```
 
-`exec` executes the text from the cursor position against the given input regular expression. If matches it will return a `RegExpExecArray`; otherwise, it will return `null`:
+`exec()` executes a search against the given regular expression from the cursor position. It returns a `RegExpExecArray` or `null`:
 
 ```
 1 | ----1234----
@@ -91,23 +93,11 @@ t.assert(cursor.oneOf(['bca', 'bcd']) === null)
 ```ts
 const regexResult = cursor.exec(/[0-9]+/)
 
-t.assert(regexResult[0] === '1234')
-t.assert(regexResult.index === 4)
+t.is(regexResult[0], '1234')
+t.is(regexResult.index, 4)
 ```
 
-Notice the hat symbol `^` will be used to indicate the cursor position instead of the beginning of the document as common use. This makes `exec` works similar to `startsWith`. For example:
-
-```
-1 | ----1234----
-  |   ^
-  |   cursor
-```
-
-```ts
-const regexResult = cursor.exec(/^[0-9]+/)
-
-t.assert(regexResult === null)
-```
+If sticky flag is enabled, `exec()` will match only from the cursor position in the target result.
 
 ```
 1 | ----1234----
@@ -116,15 +106,15 @@ t.assert(regexResult === null)
 ```
 
 ```ts
-const regexResult = cursor.exec(/^[0-9]+/)
+const regexResult = cursor.exec(/[0-9]+/y)
 
-t.assert(regexResult[0] === '1234')
-t.assert(regexResult.index === 4)
+t.is(regexResult[0], '1234')
+t.is(regexResult.index, 4)
 ```
 
 ## Read
 
-The most common way to read the document is to create a marker cursor. Then, we can use the `takeUntil` method to read the text between two cursors:
+In cursornext, the most common way to read the document is by using marker. We can create a marker from a cursor by using `clone()`, then read the text between two cursors by using `takeUntil()`:
 
 ```ts
 const cursor = Cursor.from('Hello, World!')
@@ -136,23 +126,23 @@ cursor.next(5)
 // to the current cursor position.
 const output = marker.takeUntil(cursor)
 
-t.assert(output === 'Hello')
+t.is(output, 'Hello')
 ```
 
-`exec` and `lookahead` can also be used to extract the information from the document:
+`exec()` and `lookahead()` can also be used to extract the information from the document:
 
 ```ts
 const cursor = Cursor.from('Hello, World!')
 
-t.assert(cursor.lookahead(5) === 'Hello')
+t.is(cursor.lookahead(5), 'Hello')
 cursor.next(5)
 
-t.assert(cursor.exec(/[a-zA-Z]+/)[0] === 'World')
+t.is(cursor.exec(/[a-zA-Z]+/)[0], 'World')
 ```
 
 ## Backtrack
 
-Sometimes, when working with complex syntax constraint, you may need to backtrack to the previous position. The following example illustrates how to backtrack using `moveTo` method:
+Sometimes, when working with complex syntax constraints, you may need to backtrack to the last checkpoint. The following example illustrates how to backtrack using `moveTo()` method:
 
 ```ts
 // Mark the cursor position by cloning the cursor.
