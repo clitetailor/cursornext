@@ -11,7 +11,7 @@ A cursor provides general interfaces to interact with the document. There are fo
 
 To move a cursor, we can use `next()` or `setIndex()`.
 
-`next()` moves the cursor a number of characters. By using `next()`, we can ensure that the cursor will move forward only:
+`next()` moves the cursor a number of characters. By using `next()`, we ensure that the cursor will move forward only:
 
 ```ts
 const cursor = Cursor.from('Hello, World!')
@@ -51,13 +51,13 @@ t.true(cursor.startsWith('1996'))
 
 ## Test
 
-In cursornext, there are three methods that we can use to test a cursor:
+In cursornext, there are three methods that can be used to test a cursor:
 
 - `startsWith()`
 - `oneOf()`
 - `exec()`
 
-`startsWith()` takes an input string and tests whether the document at the cursor position starts with that string. For example:
+`startsWith()` takes an input string and tests whether the document from the cursor position starts with that string. For example:
 
 ```
 1 | Hello, World!
@@ -69,7 +69,7 @@ In cursornext, there are three methods that we can use to test a cursor:
 t.true(cursor.startsWith('World'))
 ```
 
-`oneOf()` is similar to `startsWith()` except that it tests the cursor against multiple strings. If the document at the cursor position starts with any of these input strings, it would return the first string that matches. Otherwise, it would returns `null`.
+`oneOf()` is similar to `startsWith()`, except it tests the cursor against multiple strings and returns the first string that matches. Otherwise, it would returns `null`.
 
 ```
 1 | ----abcd-----
@@ -82,7 +82,7 @@ t.is(cursor.oneOf(['bcd', 'cad', 'ab', 'abcd']), 'ab')
 t.is(cursor.oneOf(['bca', 'bcd']), null)
 ```
 
-`exec()` executes a search against the given regular expression from the cursor position. It returns a `RegExpExecArray` or `null`:
+`exec()` executes a search against the given regular expression. The search is executed on the document from the cursor position. It returns a `RegExpExecArray` or `null`:
 
 ```
 1 | ----1234----
@@ -97,15 +97,18 @@ t.is(regexResult[0], '1234')
 t.is(regexResult.index, 4)
 ```
 
-If sticky flag is enabled, `exec()` will match only from the cursor position in the target result.
+If sticky flag is enabled, the match will only success if it starts from the cursor position in the document.
 
 ```
 1 | ----1234----
-  |     ^
-  |     cursor
+  |   ^
+  |   cursor
 ```
 
 ```ts
+t.is(cursor.exec(/[0-9]+/y), null)
+cursor.next(2)
+
 const regexResult = cursor.exec(/[0-9]+/y)
 
 t.is(regexResult[0], '1234')
@@ -129,7 +132,7 @@ const output = marker.takeUntil(cursor)
 t.is(output, 'Hello')
 ```
 
-`exec()` and `lookahead()` can also be used to extract the information from the document:
+`exec()` and `lookahead()` can also be used to extract information from the document:
 
 ```ts
 const cursor = Cursor.from('Hello, World!')

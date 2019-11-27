@@ -1,12 +1,12 @@
 # Loc
 
-Manually working with line and column number can be complex and inefficent. Loc API provides methods to make working with lines and columns easier and much more expressive.
+Loc API provides methods for getting cursor position and extracting lines using line numbers.
 
 ## Methods
 
 ### `getLoc()`
 
-Get the information about current cursor location.
+Get the current position of the cursor.
 
 ```ts
 const { cursor } = t.capture(`
@@ -22,7 +22,7 @@ t.is(loc.index, 18)
 
 ### `extractLine()`
 
-Extracts a specific line.
+Extract a specific line using line number.
 
 ```ts
 const { cursor } = t.capture(`
@@ -42,7 +42,7 @@ cursor.extractLine(loc.line, true)
 
 ### `extracEol()`
 
-Extracts the eol characters of a specific line.
+Extract the eol characters of a specific line using line number.
 
 ```ts
 const loc = cursor.getLoc()
@@ -56,7 +56,7 @@ t.is(eol.type, EolType.LF)
 An error message often consists of four parts:
 
 - The line numbers
-- The error line and the surrounding lines
+- The surrounding lines of code
 - An indicator indicates the cursor position
 - A label explains why the error occurs
 
@@ -70,7 +70,7 @@ For example:
 11 |   "module": "index.mjs",
 ```
 
-To get the error line and the surrounding lines, we get the line number by using `getLoc()`, then extract the line using `extractLine()`.
+To print the surrounding lines of code, we extract the line numbers using `getLoc()`, then get the surrounding lines by using `extractLine()`.
 
 ```ts
 const loc = cursor.getLoc()
@@ -85,7 +85,7 @@ for (let i = loc.line - 1; i <= loc + 1; ++i) {
 const message = lines.join('')
 ```
 
-To align the line numbers, we need to pad the line numbers to the length of the largest line number.
+Then we align line numbers to the right by padding the line numbers.
 
 ```ts
 const padLength = (loc.line + 1).toString().length
@@ -98,7 +98,7 @@ for (let i = loc.line - 1; i < loc.line + 1; ++i) {
 }
 ```
 
-Following the error line, an additional line is added to indicate the cursor position and explain the error.
+Following the current error line, an additional line is added to indicate the cursor position and explain the error.
 
 ```ts
 if (i === loc.column) {
@@ -110,7 +110,7 @@ if (i === loc.column) {
 }
 ```
 
-The overall function can be seen like so:
+Here is the full implementation of the `printError()` function:
 
 ```ts
 function printError(cursor: Cursor, errorMsg: string): string {
@@ -132,12 +132,12 @@ function printError(cursor: Cursor, errorMsg: string): string {
     if (i === loc.line) {
       const margin = ' '.repeat(padLength)
       const whitespaces = ' '.repeat(loc.column - 1)
-      const additionalLine = `${margin} | ${whitespaces}^ ${errorMsg}\n`
+      const additionalLine = `${margin} | ${whitespaces}^ ${errorMsg}`
 
       lines.push(additionalLine)
     }
   }
 
-  return lines.join('')
+  return lines.join('\n')
 }
 ```

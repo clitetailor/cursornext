@@ -10,18 +10,18 @@ const { cursor, target } = t
   .toMap()
 ```
 
-In cursornext, there are two styles of syntax:
+In cursornext, there are two syntax styles:
 
 - Inline style
 - Block style
 
-In inline syntax style, the cursor name is wrapped inside parentheses and prefixed with the `🌵` symbol (which is `Alt + 127797` on Windows).
+In inline style syntax, the cursor name is wrapped inside parentheses and prefixed with the `🌵` symbol (which is `Alt + 127797` on Windows).
 
 ```
 -----🌵(cursor)1992🌵(target)------12---86---
 ```
 
-To generate test case from inline syntax, you can use `inline()` method:
+To generate test case from the inline syntax, you can use `inline()` method:
 
 ```ts
 const { cursor, target } = t
@@ -38,7 +38,7 @@ In block style syntax, lines from document are marked with line numbers. Lines w
   |      cursor
 ```
 
-To generate test case from block syntax, we can use the `block()` method:
+To generate test case from the block syntax, we can use the `block()` method:
 
 ```ts
 const { cursor, target } = t
@@ -208,7 +208,7 @@ for (const { label, start, end } of pairs) {
       break
 
     case 'value':
-      t.is(value, '"value"')
+      t.is(value, '"Integer"')
       break
 
     case 'field':
@@ -251,7 +251,7 @@ t.config({
 
 ### `🌵()` and `🌵(none)`
 
-In caret syntax, empty labels are named `empty` by default.
+In caret syntax, empty labels are named `none` by default.
 
 ```ts
 const captureResult = t.capture(

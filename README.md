@@ -8,7 +8,7 @@
 
 While such frameworks like nearley, ohm and peg are powerful and provide out-of-the-box features for generating and testing parser. These frameworks rely heavily upon LL and LR algorithms and grammars.
 
-cursornext is a cursor-based general-purpose library for parsing which provides programmatic interface to interact with document. Because it does not rely too much on grammar, building a parser is much modular, customizable and easier for testing and debugging parser.
+cursornext is a cursor-based general-purpose library for parsing which provides programmatic interface to interact with document. Because it does not rely too much on grammar, building a parser is much more modular, customizable and easier for testing and debugging.
 
 ## Install
 
@@ -26,7 +26,7 @@ yarn add cursornext
 
 ### Create your first cursor
 
-You can create a new cursor the start of a document by using `from()` method:
+To create a new cursor, you can use `Cursor.from()` method:
 
 ```js
 const { Cursor } = require('cursornext')
@@ -34,9 +34,9 @@ const { Cursor } = require('cursornext')
 const cursor = Cursor.from('Hello, World!')
 ```
 
-From now on, you can keep playing around with your own cursor:
+Now you can move and test the cursor using `next()` and `startsWith()`.
 
-```js
+```ts
 cursor.next(7)
 cursor.startsWith('World')
 // => true
