@@ -1,28 +1,12 @@
-# Error Reporting
+# Loc
 
-When parsing, the input document may contains both syntax and semantic errors. Creating a meaningful error message can give a clear explanation about what the error is and where the error happens. The following are methods that can helps you to build a meaningful error message format.
+Loc API provides methods for getting cursor position and extracting lines using line numbers.
 
 ## Methods
 
-### `getLoc`
+### `getLoc()`
 
-Loc is a data structure represents cursor position including line, column and current index. `getLoc` extracts the cursor position and returns the corresponding `Loc` item:
-
-```ts
-const { cursor } = t.capture(`
-  Hello, World! 🌵(cursor)
-`)
-
-const loc = cursor.getLoc()
-
-assert(loc.line, 2)
-assert(loc.column, 17)
-assert(loc.index, 18)
-```
-
-### `extractLine`
-
-`extractLine` takes an input line number and returns the corresponding line from the document:
+Get the current position of the cursor.
 
 ```ts
 const { cursor } = t.capture(`
@@ -31,34 +15,62 @@ const { cursor } = t.capture(`
 
 const loc = cursor.getLoc()
 
-assert(cursor.extractLine(loc.line), '  Hello, World! \n')
+t.is(loc.line, 2)
+t.is(loc.column, 17)
+t.is(loc.index, 18)
 ```
 
-By default, `extractLine` will include the line ending character. You can exclude the character by setting the second parameter to false.
+### `extractLine()`
+
+Extract a specific line using line number.
 
 ```ts
-cursor.extractLine(loc.line, false)
+const { cursor } = t.capture(`
+  Hello, World! 🌵(cursor)
+`)
+
+const loc = cursor.getLoc()
+
+t.is(cursor.extractLine(loc.line), '  Hello, World! ')
 ```
 
-## Print the error message
+By default, `extractLine()` will not include the line ending characters. You can change the behavior by setting the second parameter to `true`.
+
+```ts
+cursor.extractLine(loc.line, true)
+```
+
+### `extracEol()`
+
+Extract the eol characters of a specific line using line number.
+
+```ts
+const loc = cursor.getLoc()
+const eol = cursor.extractEol(loc.line)
+
+t.is(eol.type, EolType.LF)
+```
+
+## Building the error message using Loc API
 
 An error message often consists of four parts:
 
 - The line numbers
-- The error line and the surrounding lines
+- The surrounding lines of code
 - An indicator indicates the cursor position
 - A label explains why the error occurs
 
 For example:
 
 ```
- 9 | a=5  b=6  c=7
-10 | a=1  b=2  c
-   |            ^ equal sign expected here!
-11 |
+ 9 |   "version": "0.0.1",
+10 |   "main": ...,
+   |           ^ Value expected
+   |
+11 |   "module": "index.mjs",
 ```
 
-To get the error line and the surrounding lines, we get the line number by using `getLoc`, then extract the line using `extractLine`.
+To print the surrounding lines of code, we extract the line numbers using `getLoc()`, then get the surrounding lines by using `extractLine()`.
 
 ```ts
 const loc = cursor.getLoc()
@@ -73,7 +85,7 @@ for (let i = loc.line - 1; i <= loc + 1; ++i) {
 const message = lines.join('')
 ```
 
-The margin size is often larger than the size of the line numbers. To align the line numbers, we can pad them to the length of the largest one.
+Then we align line numbers to the right by padding the line numbers.
 
 ```ts
 const padLength = (loc.line + 1).toString().length
@@ -86,7 +98,7 @@ for (let i = loc.line - 1; i < loc.line + 1; ++i) {
 }
 ```
 
-Following the error line, an additional line is added to indicate the cursor position and explain the error.
+Following the current error line, an additional line is added to indicate the cursor position and explain the error.
 
 ```ts
 if (i === loc.column) {
@@ -98,7 +110,7 @@ if (i === loc.column) {
 }
 ```
 
-The overall function can be seen like so:
+Here is the full implementation of the `printError()` function:
 
 ```ts
 function printError(cursor: Cursor, errorMsg: string): string {
@@ -120,12 +132,12 @@ function printError(cursor: Cursor, errorMsg: string): string {
     if (i === loc.line) {
       const margin = ' '.repeat(padLength)
       const whitespaces = ' '.repeat(loc.column - 1)
-      const additionalLine = `${margin} | ${whitespaces}^ ${errorMsg}\n`
+      const additionalLine = `${margin} | ${whitespaces}^ ${errorMsg}`
 
       lines.push(additionalLine)
     }
   }
 
-  return lines.join('')
+  return lines.join('\n')
 }
 ```

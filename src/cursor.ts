@@ -14,6 +14,10 @@ export type CursorLike =
     }
   | string
 
+export interface CursorPrintOptions {
+  label?: string
+}
+
 export class Cursor {
   eols?: Eol[]
   doc: string
@@ -65,7 +69,7 @@ export class Cursor {
 
   extractLine(
     line: number,
-    includeEol: boolean = true
+    includeEol: boolean = false
   ): string | undefined {
     this.compute()
 
@@ -79,6 +83,12 @@ export class Cursor {
     }
 
     return
+  }
+
+  extractEol(line: number): Eol | undefined {
+    this.compute()
+
+    return (<Eol[]>this.eols)[line - 1]
   }
 
   numberOfLines(): number {
@@ -144,7 +154,7 @@ export class Cursor {
     this.index = index
 
     if (this.index < 0) {
-      return 0
+      return
     }
 
     const endIndex = this.endIndex()
@@ -204,21 +214,16 @@ export class Cursor {
   exec(input: RegExp | string): RegExpExecArray | null {
     const regExp = new RegExp(input)
 
-    const flags = regExp.flags
-    const hat = regExp.source[0] === '^'
+    const regExpFlags =
+      regExp.flags.indexOf('g') !== -1
+        ? regExp.flags
+        : regExp.flags + 'g'
 
-    const newRegExp = new RegExp(
-      hat ? regExp.source.substring(1) : regExp,
-      flags.indexOf('g') === -1 ? flags + 'g' : flags
-    )
+    const newRegExp = new RegExp(regExp.source, regExpFlags)
 
     newRegExp.lastIndex = this.index
 
-    const execArr = newRegExp.exec(this.doc)
-
-    return hat && execArr && execArr.index !== this.index
-      ? null
-      : execArr
+    return newRegExp.exec(this.doc)
   }
 
   isEof(): boolean {
@@ -258,7 +263,7 @@ export class Cursor {
     return this.index === index
   }
 
-  printDebug(name?: string): string {
+  printDebug({ label }: CursorPrintOptions = {}): string {
     const loc = this.getLoc()
     const padLength = (loc.line + 1).toString().length
 
@@ -280,17 +285,15 @@ export class Cursor {
           const lastLoc = (<Eol[]>this.eols)[lineNumber]
 
           const markerLine =
-            (lastLoc.type === EolType.EOF ? EolType.LF : '') +
             ''.padStart(padLength) +
             ' | ' +
             ' '.repeat(loc.column - 1) +
             '^' +
-            (name
-              ? EolType.LF +
-                ''.padStart(padLength) +
+            (label
+              ? ''.padStart(padLength) +
                 ' | ' +
                 ' '.repeat(loc.column - 1) +
-                name
+                label
               : '') +
             lastLoc.type
 
@@ -299,10 +302,6 @@ export class Cursor {
       }
     }
 
-    return lines.join('')
-  }
-
-  debug(name?: string) {
-    console.log(this.printDebug(name) + '\n')
+    return lines.join('\n')
   }
 }

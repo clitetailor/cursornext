@@ -2,7 +2,7 @@
   cursor|<i class="text-blue">next</i>
 </h1>
 
-<p align="center">A minimalist library for parsing</p>
+<p align="center">A minimalist parsing library for Node.js</p>
 
 ## Why cursor|next?
 
@@ -26,7 +26,7 @@ yarn add cursornext
 
 ### Create your first cursor
 
-You can create a new cursor the start of a document by using `from` method:
+To create a new cursor, you can use `Cursor.from()` method:
 
 ```js
 const { Cursor } = require('cursornext')
@@ -34,9 +34,9 @@ const { Cursor } = require('cursornext')
 const cursor = Cursor.from('Hello, World!')
 ```
 
-From now on, you can keep playing around with your own cursor:
+Now you can move and test the cursor using `next()` and `startsWith()`.
 
-```js
+```ts
 cursor.next(7)
 cursor.startsWith('World')
 // => true
@@ -48,7 +48,7 @@ For more documentation, please checkout the [`docs`](./docs) directory:
 
 - [Parsing Patterns](./docs/01-parsing-patterns.md)
 - [Writing Tests](./docs/02-writing-tests.md)
-- [Error Reporting](./docs/03-error-reporting.md)
+- [Loc](./docs/03-loc.md)
 
 ## License
 

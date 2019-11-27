@@ -1,23 +1,152 @@
 import { Cursor } from './cursor'
 import { parseLabel } from './utils/label'
-import { trimNewLine } from './utils/string'
 
 export interface CursorTestOptions {
   prefix?: string
   noLabel?: boolean
 }
 
-export interface CursorMap {
-  [name: string]: Cursor
+export class CaptureBuffer {
+  indexes: [string, number][] = []
+
+  add(label: string, index: number) {
+    this.indexes.push([label, index])
+  }
+
+  toCaptureResult(doc: string) {
+    return new CaptureResult(
+      doc,
+      this.indexes.sort((a, b) => a[1] - b[1])
+    )
+  }
 }
 
-export interface CaptureResult {
-  [name: string]: any
-  iter(options?: Partial<IterableOptions>): CaptureIterable
+export class CaptureResult {
+  constructor(
+    private doc: string,
+    private indexes: [string, number][] = []
+  ) {}
+
+  toMap(): CaptureMap {
+    const result: CaptureMap = {}
+    const indexes = this.indexes
+    const doc = this.doc
+
+    for (const [label, index] of indexes) {
+      result[label] = new Cursor({
+        doc,
+        index
+      })
+    }
+
+    return result
+  }
+
+  toArray(): Cursor[] {
+    const doc = this.doc
+
+    return this.indexes.map(
+      ([, index]) =>
+        new Cursor({
+          doc,
+          index
+        })
+    )
+  }
+
+  toIter(): CaptureIterable {
+    const cursors: Cursor[] = []
+    const doc = this.doc
+    const indexes = this.indexes
+
+    for (const [, index] of indexes) {
+      cursors.push(
+        new Cursor({
+          doc,
+          index
+        })
+      )
+    }
+
+    return new CaptureIterable(cursors)
+  }
+
+  toPairs(): CapturePair[] {
+    const pairs: CapturePair[] = []
+    const indexes = this.indexes
+    const doc = this.doc
+
+    const stack: [string, number][] = []
+    const list: [string, number][] = []
+
+    for (const [label, index] of indexes) {
+      const matchResult = label.match(/(start|end)\s*\((.*)\)/)
+
+      if (matchResult) {
+        const [, prefix, label] = matchResult
+
+        if (prefix === 'start') {
+          list.unshift([label, index])
+        } else {
+          const itemIndex = list.findIndex(
+            ([lastLabel]) => lastLabel === label
+          )
+
+          if (itemIndex !== -1) {
+            const [[, lastIndex]] = list.splice(itemIndex, 1)
+
+            const start = new Cursor({
+              doc,
+              index: lastIndex
+            })
+            const end = new Cursor({
+              doc,
+              index
+            })
+
+            pairs.push({
+              label,
+              start,
+              end
+            })
+          }
+        }
+      } else {
+        if (stack.length) {
+          const [lastLabel, lastIndex] = stack[stack.length - 1]
+
+          if (label === lastLabel) {
+            const start = new Cursor({
+              doc,
+              index: lastIndex
+            })
+            const end = new Cursor({
+              doc,
+              index
+            })
+
+            pairs.push({
+              label,
+              start,
+              end
+            })
+
+            stack.pop()
+          } else {
+            stack.push([label, index])
+          }
+        } else {
+          stack.push([label, index])
+        }
+      }
+    }
+
+    return pairs
+  }
 }
 
-export interface IterableOptions {
-  named: boolean | undefined
+export interface CaptureMap {
+  [label: string]: Cursor
 }
 
 export class CaptureIterable {
@@ -47,55 +176,63 @@ export class CaptureIterable {
       }
     }
   }
+}
 
-  toArray() {
-    return this.cursors
-  }
+export interface CapturePair {
+  label: string
+  start: Cursor
+  end: Cursor
 }
 
 export class CursorTest {
-  private options: CursorTestOptions
+  private _options: CursorTestOptions
 
   constructor(options?: CursorTestOptions) {
-    this.options = options || {
+    this._options = options || {
       prefix: '🌵',
       noLabel: false
     }
   }
 
-  clone(testOptions: CursorTestOptions) {
-    this.options = {
-      ...this.options,
+  config(testOptions: CursorTestOptions) {
+    this._options = {
+      ...this._options,
       ...testOptions
     }
+  }
+
+  options(testOptions: CursorTestOptions) {
+    return new CursorTest({
+      ...this._options,
+      ...testOptions
+    })
   }
 
   capture(
     input: string,
     testOptions?: CursorTestOptions
   ): CaptureResult {
-    return this.inlineInternal(input, {
-      ...this.options,
+    return this._inline(input, {
+      ...this._options,
       ...(testOptions || {})
     })
   }
 
-  inline(strings: TemplateStringsArray): CaptureResult {
-    return this.inlineInternal(
-      trimNewLine(strings.join('')),
-      this.options
-    )
+  inline(
+    input: string,
+    testOptions?: CursorTestOptions
+  ): CaptureResult {
+    return this._inline(this.trim(input), testOptions)
   }
 
-  private inlineInternal(
+  private _inline(
     input: string,
     testOptions?: CursorTestOptions
   ): CaptureResult {
     const cursor = Cursor.from(input)
 
     let offset = 0
-    const indexes: number[] = []
-    const names: (string | undefined)[] = []
+    const buffer = new CaptureBuffer()
     const chunks: string[] = []
 
     const { prefix, noLabel } = {
@@ -109,29 +246,29 @@ export class CursorTest {
 
     while (!cursor.isEof()) {
       if (cursor.startsWith(prefix)) {
-        indexes.push(cursor.index - offset)
+        const captureIndex = cursor.index - offset
         chunks.push(marker.takeUntil(cursor))
         marker.moveTo(cursor)
 
         cursor.next(prefixLen)
 
         if (!noLabel) {
-          const name = parseLabel(cursor)
+          const label = parseLabel(cursor)
 
-          switch (name) {
+          switch (label) {
             case 'iter':
             case '':
-              names.push(undefined)
+              buffer.add('none', captureIndex)
               break
             case 'symbol':
               chunks.push(prefix)
               break
             default:
-              names.push(name)
+              buffer.add(label, captureIndex)
               break
           }
         } else {
-          names.push(undefined)
+          buffer.add('none', captureIndex)
         }
 
         offset += cursor.index - marker.index
@@ -144,37 +281,62 @@ export class CursorTest {
     chunks.push(marker.takeUntil(cursor))
     const doc = chunks.join('')
 
-    const cursors = indexes.map(
-      index => new Cursor({ doc, index })
-    )
-
-    const namedCursors: CursorMap = names.reduce(
-      (target, name, index) => {
-        return name
-          ? {
-              ...target,
-              [name]: new Cursor({ doc, index: indexes[index] })
-            }
-          : target
-      },
-      {}
-    )
-
-    return {
-      ...namedCursors,
-      iter: ({
-        named = false
-      }: Partial<IterableOptions> = {}) =>
-        named
-          ? new CaptureIterable(cursors)
-          : new CaptureIterable(
-              cursors.filter((_cursor, index) => !names[index])
-            )
-    }
+    return buffer.toCaptureResult(doc)
   }
 
-  trimNewLine(strings: TemplateStringsArray) {
-    return trimNewLine(strings.join())
+  block(
+    input: string,
+    _testOptions: CursorTestOptions = {}
+  ): CaptureResult {
+    const cursor = Cursor.from(input)
+    const chunks = []
+
+    const buffer = new CaptureBuffer()
+    let offset = 0
+    let lineLen = 0
+
+    while (!cursor.isEof()) {
+      const regexpArray = cursor.exec(
+        /^[ \t]*([0-9]+)?[ \t]*\|[ \t](.*?)$/m
+      )
+
+      if (regexpArray) {
+        const lineNumber = regexpArray[1]
+        const line = regexpArray[2] + '\n'
+
+        if (lineNumber) {
+          offset += lineLen
+
+          chunks.push(line)
+          lineLen = line.length
+        } else {
+          if (!line.match(/\s*\^/)) {
+            const matchResult = line.match(/([\s|]*)(.*)/)
+
+            if (matchResult) {
+              const index = offset + matchResult[1].length
+              const label = matchResult[2].trim()
+
+              buffer.add(label, index)
+            }
+          }
+        }
+
+        cursor.setIndex(
+          regexpArray.index + regexpArray[0].length
+        )
+      } else {
+        cursor.next(1)
+      }
+    }
+
+    return buffer.toCaptureResult(chunks.join(''))
+  }
+
+  trim(input: string) {
+    return input
+      .replace(/^[ \t]*?\r?\n/, '')
+      .replace(/\r?\n[ \t]*?$/, '')
   }
 }
 

@@ -1,17 +1,56 @@
-import test from 'ava'
-import { Cursor } from '../src'
-import { runParseTest } from './helpers/runner'
+import test, { ExecutionContext } from 'ava'
+import { Cursor, t as tt } from '../src'
 
-test('`exec` should work probably', t => {
-  function isDigit(cursor: Cursor) {
-    return !!cursor.exec(/^[0-9]/)
+export function parseTest(
+  t: ExecutionContext,
+  isDigit: (cursor: Cursor) => boolean
+) {
+  function parseInteger(cursor: Cursor) {
+    const marker = cursor.clone()
+
+    while (isDigit(cursor) && !cursor.isEof()) {
+      cursor.next(1)
+    }
+
+    const value = parseInt(marker.takeUntil(cursor))
+
+    return {
+      type: 'Integer',
+      value
+    }
   }
 
-  runParseTest(t, isDigit)
+  const iter = tt
+    .capture(
+      '-----🌵()1992🌵()------🌵()12🌵()---🌵()86🌵()---'
+    )
+    .toIter()
+  const values = [1992, 12, 86]
+
+  values.forEach(value => {
+    const cursor = iter.next()
+    const target = iter.next()
+
+    const input = parseInteger(cursor)
+
+    t.deepEqual(input, {
+      type: 'Integer',
+      value
+    })
+    t.is(cursor.index, target.index, cursor.doc)
+  })
+}
+
+test('`exec` should work probably', t => {
+  function isDigit(cursor: Cursor): boolean {
+    return !!cursor.exec(/[0-9]/y)
+  }
+
+  parseTest(t, isDigit)
 })
 
 test('`startsWith` should work probably', t => {
-  const digits = Array.from({ length: 10 }, (v, k) =>
+  const digits = Array.from({ length: 10 }, (_v, k) =>
     k.toString()
   )
 
@@ -25,11 +64,11 @@ test('`startsWith` should work probably', t => {
     return false
   }
 
-  runParseTest(t, isDigit)
+  parseTest(t, isDigit)
 })
 
 test('`oneOf` should work probably', t => {
-  const digits = Array.from({ length: 10 }, (v, k) =>
+  const digits = Array.from({ length: 10 }, (_v, k) =>
     k.toString()
   )
 
@@ -37,7 +76,7 @@ test('`oneOf` should work probably', t => {
     return !!cursor.oneOf(digits)
   }
 
-  runParseTest(t, isDigit)
+  parseTest(t, isDigit)
 })
 
 test('`lookahead` should work probably', t => {
@@ -47,5 +86,5 @@ test('`lookahead` should work probably', t => {
     return '0' <= char && char <= '9'
   }
 
-  runParseTest(t, isDigit)
+  parseTest(t, isDigit)
 })
