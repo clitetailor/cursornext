@@ -69,7 +69,7 @@ export class Cursor {
 
   extractLine(
     line: number,
-    includeEol: boolean = true
+    includeEol: boolean = false
   ): string | undefined {
     this.compute()
 
@@ -285,14 +285,12 @@ export class Cursor {
           const lastLoc = (<Eol[]>this.eols)[lineNumber]
 
           const markerLine =
-            (lastLoc.type === EolType.EOF ? EolType.LF : '') +
             ''.padStart(padLength) +
             ' | ' +
             ' '.repeat(loc.column - 1) +
             '^' +
             (label
-              ? EolType.LF +
-                ''.padStart(padLength) +
+              ? ''.padStart(padLength) +
                 ' | ' +
                 ' '.repeat(loc.column - 1) +
                 label
@@ -304,6 +302,6 @@ export class Cursor {
       }
     }
 
-    return lines.join('')
+    return lines.join('\n')
   }
 }

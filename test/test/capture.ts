@@ -67,7 +67,7 @@ export function toPairsTest(
   })
 }
 
-test('`toPairs()` should works probably', t => {
+test('`toPairs` should works probably', t => {
   const captureResult = tt.capture(`
     🌵(field)🌵(key)a🌵(key) = 🌵(value)5🌵(value)🌵(field)
   `)

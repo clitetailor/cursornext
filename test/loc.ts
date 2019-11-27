@@ -61,7 +61,7 @@ export function extractLineTest(
       return line ? `${lineNumber} | ${line}` : undefined
     })
     .filter(line => line)
-    .join('')
+    .join('\n')
 
   t.is(output, expected, cursor.doc)
 }
@@ -73,13 +73,12 @@ test('`extractLine` should work probably', t => {
     Hello, World!
     This is an example 🌵\`getLoc\` test.
   `)
-
-  const extractedLine = tt.trim(`
+  const expected = tt.trim(`
 3 |     Hello, World!
 4 |     This is an example \`getLoc\` test.
   `)
 
-  extractLineTest(t, doc, extractedLine)
+  extractLineTest(t, doc, expected)
 })
 
 export function extractEolTest(
@@ -95,7 +94,7 @@ export function extractEolTest(
   const loc = cursor?.getLoc()
   const eol = cursor?.extractEol(loc.line)
 
-  t.is(eol?.type, expected)
+  t.is(eol?.type, expected, cursor.doc)
 }
 
 test('`extractEol` should work probably', t => {
@@ -130,12 +129,11 @@ test('`printDebug` should work probably', t => {
     Hello, World!
     This is an example 🌵\`getLoc\` test.
   `)
-
-  const debugMsg = tt.trim(`
+  const expected = tt.trim(`
 3 |     Hello, World!
 4 |     This is an example \`getLoc\` test.
   |                        ^
   `)
 
-  printDebugTest(t, doc, debugMsg)
+  printDebugTest(t, doc, expected)
 })
