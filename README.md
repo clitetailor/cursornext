@@ -6,9 +6,9 @@
 
 ## Why cursor|next?
 
-While such frameworks like nearley, ohm and peg are powerful and provide out-of-the-box features for generating and testing parser. These frameworks rely heavily upon LL and LR algorithms and grammars.
+While such frameworks like nearley, ohm and peg are powerful already and provide out-of-the-box features for generating and testing parser. These frameworks rely heavily upon LL and LR algorithms and grammars.
 
-cursornext is a cursor-based general-purpose library for parsing which provides programmatic interface to interact with document. Because it does not rely too much on grammar, building a parser is much more modular, customizable and easier for testing and debugging.
+cursornext takes another approach, it provides the lowest lever interface to interact with the document and let you decide how to parse your own syntax. The downside is that you have to put more efforts building your own parser. Because you are not rely on any built-in algorithm and grammar, it may lacks of tools for checking and generating syntax tree. The upside is that building a parser tool is now more modular and customizable. The interface is also simple that it is much more friendlier to work with Chrome or Node debugger.
 
 ## Install
 
