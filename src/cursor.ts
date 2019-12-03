@@ -196,9 +196,21 @@ export class Cursor {
   }
 
   startsWith(compareString: string): boolean {
-    return (
-      compareString === this.lookahead(compareString.length)
-    )
+    const doc = this.doc
+
+    for (
+      let index = 0,
+        docIndex = this.index,
+        len = compareString.length;
+      index < len;
+      ++index, ++docIndex
+    ) {
+      if (doc[docIndex] !== compareString[index]) {
+        return false
+      }
+    }
+
+    return true
   }
 
   oneOf(compareStrings: string[]): string | undefined {
@@ -211,19 +223,12 @@ export class Cursor {
     return undefined
   }
 
-  exec(input: RegExp | string): RegExpExecArray | null {
-    const regExp = new RegExp(input)
+  exec(input: RegExp): RegExpExecArray | null {
+    const regExp = input.global ? input : new RegExp(input)
 
-    const regExpFlags =
-      regExp.flags.indexOf('g') !== -1
-        ? regExp.flags
-        : regExp.flags + 'g'
+    regExp.lastIndex = this.index
 
-    const newRegExp = new RegExp(regExp.source, regExpFlags)
-
-    newRegExp.lastIndex = this.index
-
-    return newRegExp.exec(this.doc)
+    return regExp.exec(this.doc)
   }
 
   isEof(): boolean {
