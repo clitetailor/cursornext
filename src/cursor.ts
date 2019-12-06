@@ -278,7 +278,7 @@ export class Cursor {
       const lineNumber = loc.line + i
       const line = this.extractLine(lineNumber)
 
-      if (line) {
+      if (line !== undefined) {
         const outputLine =
           lineNumber.toString().padStart(padLength) +
           ' | ' +
@@ -287,22 +287,21 @@ export class Cursor {
         lines.push(outputLine)
 
         if (lineNumber === loc.line) {
-          const lastLoc = (<Eol[]>this.eols)[lineNumber]
-
           const markerLine =
             ''.padStart(padLength) +
             ' | ' +
             ' '.repeat(loc.column - 1) +
-            '^' +
-            (label
-              ? ''.padStart(padLength) +
-                ' | ' +
-                ' '.repeat(loc.column - 1) +
-                label
-              : '') +
-            lastLoc.type
-
+            '^'
           lines.push(markerLine)
+
+          if (label) {
+            const labelLine =
+              ''.padStart(padLength) +
+              ' | ' +
+              ' '.repeat(loc.column - 1) +
+              label
+            lines.push(labelLine)
+          }
         }
       }
     }
