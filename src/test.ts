@@ -297,7 +297,7 @@ export class CursorTest {
 
     while (!cursor.isEof()) {
       const regexpArray = cursor.exec(
-        /^[ \t]*([0-9]+)?[ \t]*\|[ \t](.*?)$/m
+        /^[ \t]*([0-9]+)?[ \t]*\|[ \t](.*?)$/gmy
       )
 
       if (regexpArray) {

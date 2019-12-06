@@ -1,5 +1,9 @@
 /node_modules
 
+Profile*.json
+report*.json
+yarn*.log
+
 *.js
 *.d.ts
 *.map
