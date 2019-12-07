@@ -1,27 +1,75 @@
 import { src, task, dest, series } from 'gulp'
-import ts from 'gulp-typescript'
 import del from 'del'
-import rename from 'gulp-rename'
-import sourcemaps from 'gulp-sourcemaps'
+import fs from 'fs-extra'
+import ts from 'gulp-typescript'
+import path from 'path'
 import merge from 'merge-stream'
+import rename from 'gulp-rename'
+import replace from 'gulp-replace'
+import sourcemaps from 'gulp-sourcemaps'
 import { rollup } from 'rollup'
 
 import { default as getRollupConfig } from './rollup.config'
 
 const reporter = ts.reporter.fullReporter(true)
 
-task('build:cjs', () => {
+task('build:cjs', async () => {
   const tsProject = ts.createProject('tsconfig.json', {
     declaration: true
   })
+
+  await fs.outputFile(
+    path.resolve(__dirname, 'cjs/package.json'),
+    JSON.stringify(
+      {
+        type: 'commonjs'
+      },
+      null,
+      2
+    ) + '\n'
+  )
 
   const result = src('src/**/*.ts')
     .pipe(sourcemaps.init())
     .pipe(tsProject(reporter))
 
   return merge(
-    result.js.pipe(sourcemaps.write('.')).pipe(dest('.')),
-    result.dts.pipe(dest('.'))
+    result.js
+      .pipe(addImportExt('cjs'))
+      .pipe(sourcemaps.write('.'))
+      .pipe(dest('cjs')),
+    result.dts.pipe(addImportExt('dts')).pipe(dest('cjs'))
+  )
+})
+
+task('build:esm', async () => {
+  const tsProject = ts.createProject('tsconfig.json', {
+    target: 'esnext',
+    module: 'esnext',
+    declaration: true
+  })
+
+  await fs.outputFile(
+    path.resolve(__dirname, 'esm/package.json'),
+    JSON.stringify(
+      {
+        type: 'module'
+      },
+      null,
+      2
+    ) + '\n'
+  )
+
+  const result = src('src/**/*.ts')
+    .pipe(sourcemaps.init())
+    .pipe(tsProject(reporter))
+
+  return merge(
+    result.js
+      .pipe(addImportExt('esm'))
+      .pipe(sourcemaps.write('.'))
+      .pipe(dest('esm')),
+    result.dts.pipe(addImportExt('dts')).pipe(dest('esm'))
   )
 })
 
@@ -37,36 +85,27 @@ task('build:umd', async () => {
   }
 })
 
-task('build:esm', () => {
-  const tsProject = ts.createProject('tsconfig.json', {
-    target: 'esnext',
-    module: 'esnext'
-  })
-
-  return src('src/**/*.ts')
-    .pipe(tsProject(reporter))
-    .js.pipe(
-      rename({
-        suffix: '.esm'
-      })
-    )
-    .pipe(dest('.'))
-})
-
 export const build = series(
   'build:cjs',
-  'build:umd',
-  'build:esm'
+  'build:esm',
+  'build:umd'
 )
 
 export const clean = () => {
   return del([
-    '**/*.js',
-    '**/*.d.ts',
-    '**/*.map',
-    '!node_modules',
-    '!gulpfile.esm.js',
-    '!babel.config.js',
-    '!rollup.config.js'
+    'cjs',
+    'esm',
+    '*.umd.js',
+    '*.map',
+    '!node_modules'
   ])
+}
+
+function addImportExt(type) {
+  return replace(
+    type === 'esm' || type === 'dts'
+      ? /(from\s+["'])([^"']*)(["'])/g
+      : /(require\(["'])([^"']+)(["']\))/g,
+    '$1$2.js$3'
+  )
 }

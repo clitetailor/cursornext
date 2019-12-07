@@ -10,7 +10,9 @@ export default (options) => {
         dir: '.',
         format: 'umd',
         name: 'cursornext',
-        entryFileNames: '[name].[format].js'
+        sourcemap: true,
+        sourcemapFile: 'cursornext.umd.js.map',
+        entryFileNames: 'cursornext.umd.js'
       },
       plugins: [
         typescript({
