@@ -4,12 +4,10 @@ Profile*.json
 report*.json
 yarn*.log
 
-*.js
-*.d.ts
+cjs
+esm
+*.umd.js
 *.map
-
-!gulpfile.esm.js
-!rollup.config.js
-!babel.config.js
+*.d.ts
 
 cursornext-*.tgz
