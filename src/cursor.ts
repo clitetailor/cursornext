@@ -145,23 +145,21 @@ export class Cursor {
     return this.end || this.doc.length
   }
 
-  setIndex(index?: number) {
-    if (index !== 0 && !index) {
-      this.index = this.endIndex()
-      return
-    }
+  setIndex(index: number) {
+    if (index < 0) {
+      this.index = 0
 
-    this.index = index
-
-    if (this.index < 0) {
       return
     }
 
     const endIndex = this.endIndex()
-
-    if (this.index >= endIndex) {
+    if (index > endIndex) {
       this.index = endIndex
+
+      return
     }
+
+    this.index = index
   }
 
   moveTo(cursor: Cursor) {
@@ -278,7 +276,7 @@ export class Cursor {
       const lineNumber = loc.line + i
       const line = this.extractLine(lineNumber)
 
-      if (line) {
+      if (line !== undefined) {
         const outputLine =
           lineNumber.toString().padStart(padLength) +
           ' | ' +
@@ -287,22 +285,27 @@ export class Cursor {
         lines.push(outputLine)
 
         if (lineNumber === loc.line) {
-          const lastLoc = (<Eol[]>this.eols)[lineNumber]
-
           const markerLine =
             ''.padStart(padLength) +
             ' | ' +
             ' '.repeat(loc.column - 1) +
-            '^' +
-            (label
-              ? ''.padStart(padLength) +
-                ' | ' +
-                ' '.repeat(loc.column - 1) +
-                label
-              : '') +
-            lastLoc.type
+            '^'
 
           lines.push(markerLine)
+
+          if (label) {
+            const labelLine =
+              ''.padStart(padLength) +
+              ' | ' +
+              ' '.repeat(loc.column - 1) +
+              label
+
+            lines.push(labelLine)
+          }
+
+          const emptyLine = ''.padStart(padLength) + ' | '
+
+          lines.push(emptyLine)
         }
       }
     }

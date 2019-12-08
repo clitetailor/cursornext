@@ -192,7 +192,7 @@ const pairs = t
         |
       3 |   "value": 1992
       4 | }
-      5 |
+      5 | 
     `
   )
   .toPairs()
