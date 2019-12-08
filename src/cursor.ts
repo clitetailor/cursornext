@@ -145,23 +145,21 @@ export class Cursor {
     return this.end || this.doc.length
   }
 
-  setIndex(index?: number) {
-    if (index !== 0 && !index) {
-      this.index = this.endIndex()
-      return
-    }
+  setIndex(index: number) {
+    if (index < 0) {
+      this.index = 0
 
-    this.index = index
-
-    if (this.index < 0) {
       return
     }
 
     const endIndex = this.endIndex()
-
-    if (this.index >= endIndex) {
+    if (index > endIndex) {
       this.index = endIndex
+
+      return
     }
+
+    this.index = index
   }
 
   moveTo(cursor: Cursor) {
@@ -292,6 +290,7 @@ export class Cursor {
             ' | ' +
             ' '.repeat(loc.column - 1) +
             '^'
+
           lines.push(markerLine)
 
           if (label) {
@@ -300,8 +299,13 @@ export class Cursor {
               ' | ' +
               ' '.repeat(loc.column - 1) +
               label
+
             lines.push(labelLine)
           }
+
+          const emptyLine = ''.padStart(padLength) + ' | '
+
+          lines.push(emptyLine)
         }
       }
     }

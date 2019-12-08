@@ -127,12 +127,13 @@ test('`printDebug` should work probably', t => {
 
 
     Hello, World!
-    This is an example 🌵\`getLoc\` test.
+    This is an example 🌵\`printDebug\` test.
   `)
   const expected = tt.trim(`
 3 |     Hello, World!
-4 |     This is an example \`getLoc\` test.
+4 |     This is an example \`printDebug\` test.
   |                        ^
+  | 
   `)
 
   printDebugTest(t, doc, expected)
