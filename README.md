@@ -1,8 +1,10 @@
-<h1 align="center">
-  cursor|<i class="text-blue">next</i>
-</h1>
+<div align="center">
+  <h1>
+    cursor|<i class="text-blue">next</i>
+  </h1>
 
-<p align="center">A minimalist parsing library for Node.js</p>
+  <p>A minimalist parsing library for Node.js</p>
+</div>
 
 ## Why cursor|next?
 
