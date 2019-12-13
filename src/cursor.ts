@@ -54,9 +54,14 @@ export class Cursor {
   getLoc(): Loc {
     this.compute()
 
-    const line = (<Eol[]>this.eols).findIndex(
-      eol => this.index <= eol.start
+    let line = (<Eol[]>this.eols).findIndex(
+      eol => this.index < eol.end
     )
+
+    if (line === -1) {
+      line = this.numberOfLines()
+    }
+
     const column =
       this.index - (<Eol[]>this.eols)[line - 1].end + 1
 
