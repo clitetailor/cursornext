@@ -4,6 +4,7 @@ import fs from 'fs-extra'
 import ts from 'gulp-typescript'
 import path from 'path'
 import merge from 'merge-stream'
+import rename from 'gulp-rename'
 import replace from 'gulp-replace'
 import sourcemaps from 'gulp-sourcemaps'
 import { rollup } from 'rollup'
@@ -84,16 +85,36 @@ task('build:umd', async () => {
   }
 })
 
+task('build:deno', async () => {
+  return src('src/**/*.ts')
+    .pipe(
+      rename(path => {
+        if (path.basename === 'index') {
+          return {
+            ...path,
+            basename: 'mod'
+          }
+        }
+
+        return path
+      })
+    )
+    .pipe(addImportExt('deno'))
+    .pipe(dest('deno'))
+})
+
 export const build = series(
   'build:cjs',
   'build:esm',
-  'build:umd'
+  'build:umd',
+  'build:deno'
 )
 
 export const clean = () => {
   return del([
     'cjs',
     'esm',
+    'deno',
     '*.umd.js',
     '*.map',
     '!node_modules'
@@ -101,6 +122,27 @@ export const clean = () => {
 }
 
 function addImportExt(type) {
+  switch (type) {
+    case 'esm':
+    case 'dts':
+      return replace(
+        /(from\s+["'])([^"']*)(["'])/g,
+        '$1$2.js$3'
+      )
+
+    case 'deno':
+      return replace(
+        /(from\s+["'])([^"']*)(["'])/g,
+        '$1$2.ts$3'
+      )
+
+    default:
+      return replace(
+        /(require\(["'])([^"']+)(["']\))/g,
+        '$1$2.js$3'
+      )
+  }
+
   return replace(
     type === 'esm' || type === 'dts'
       ? /(from\s+["'])([^"']*)(["'])/g

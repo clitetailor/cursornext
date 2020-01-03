@@ -64,7 +64,7 @@
   "bugs": {
     "url": "https://github.com/clitetailor/cursornext/issues"
   },
-  "homepage": "https://github.com/clitetailor/cursornext#readme",
+  "homepage": "https://github.com/clitetailor/cursornext",
   "ava": {
     "require": [
       "ts-node/register"
