@@ -1,6 +1,6 @@
 {
   "name": "cursornext",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "commonjs",
   "main": "./cjs/index.js",
   "module": "./esm/index.js",
@@ -28,7 +28,7 @@
     "format": "prettier -c .prettierrc.yaml --write **/*.{ts,md,yml,yaml,json}",
     "test": "ava",
     "prepack": "yarn clean && yarn format && yarn test && yarn build",
-    "preversion": "yarn build && yarn clean && yarn format && yarn test"
+    "preversion": "yarn build && yarn clean && yarn format && yarn test && gulp build:deno"
   },
   "repository": {
     "type": "git",
