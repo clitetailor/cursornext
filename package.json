@@ -5,7 +5,7 @@
   "main": "./cjs/index.js",
   "module": "./esm/index.js",
   "exports": {
-    "./": "./cjs/index.js",
+    ".": "./cjs/index.js",
     "./module": "./esm/index.js"
   },
   "files": [
