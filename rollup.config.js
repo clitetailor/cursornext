@@ -1,6 +1,6 @@
-import typescript from 'rollup-plugin-typescript2'
+import typescript from '@rollup/plugin-typescript'
 
-export default (options) => {
+export default options => {
   const buildPlans = []
 
   if (format(options, 'umd')) {
@@ -16,11 +16,7 @@ export default (options) => {
       },
       plugins: [
         typescript({
-          tsconfigOverride: {
-            compilerOptions: {
-              module: 'es2015'
-            }
-          }
+          module: 'es2015'
         })
       ]
     })

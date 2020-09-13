@@ -16,7 +16,7 @@ export function parseTest(
 
     return {
       type: 'Integer',
-      value
+      value,
     }
   }
 
@@ -27,7 +27,7 @@ export function parseTest(
     .toIter()
   const values = [1992, 12, 86]
 
-  values.forEach(value => {
+  values.forEach((value) => {
     const cursor = iter.next()
     const target = iter.next()
 
@@ -35,13 +35,13 @@ export function parseTest(
 
     t.deepEqual(input, {
       type: 'Integer',
-      value
+      value,
     })
     t.is(cursor.index, target.index, cursor.doc)
   })
 }
 
-test('`exec` should work probably', t => {
+test('`exec` should work probably', (t) => {
   function isDigit(cursor: Cursor): boolean {
     return !!cursor.exec(/[0-9]/y)
   }
@@ -49,7 +49,7 @@ test('`exec` should work probably', t => {
   parseTest(t, isDigit)
 })
 
-test('`startsWith` should work probably', t => {
+test('`startsWith` should work probably', (t) => {
   const digits = Array.from({ length: 10 }, (_v, k) =>
     k.toString()
   )
@@ -67,7 +67,7 @@ test('`startsWith` should work probably', t => {
   parseTest(t, isDigit)
 })
 
-test('`oneOf` should work probably', t => {
+test('`oneOf` should work probably', (t) => {
   const digits = Array.from({ length: 10 }, (_v, k) =>
     k.toString()
   )
@@ -79,7 +79,7 @@ test('`oneOf` should work probably', t => {
   parseTest(t, isDigit)
 })
 
-test('`lookahead` should work probably', t => {
+test('`lookahead` should work probably', (t) => {
   function isDigit(cursor: Cursor) {
     const char = cursor.lookahead(1)
 

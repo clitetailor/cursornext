@@ -73,7 +73,7 @@ function parseInteger(cursor: Cursor) {
 
   return {
     type: 'Integer',
-    value
+    value,
   }
 }
 ```
@@ -115,7 +115,7 @@ const token = parseInteger(cursor)
 t.assert(cursor.isAt(target))
 t.deepEqual(token, {
   type: 'Integer',
-  value: 1992
+  value: 1992,
 })
 ```
 
@@ -167,7 +167,7 @@ For people who prefer to work with iterator, we can explicitly omit the labeled 
 ```ts
 const iter = t
   .inline('-----🌵1992🌵------🌵12🌵---🌵86🌵---', {
-    noLabel: true
+    noLabel: true,
   })
   .toIter()
 ```
@@ -234,7 +234,7 @@ You can config the test object per test case by passing config options as the se
 ```ts
 t.capture('-----🔥1992🔥------12---86---', {
   prefix: '🔥',
-  noLabel: true
+  noLabel: true,
 })
 ```
 
@@ -243,7 +243,7 @@ The global configuration can be changed by using `config()`:
 ```ts
 t.config({
   prefix: '🔥',
-  noLabel: true
+  noLabel: true,
 })
 ```
 

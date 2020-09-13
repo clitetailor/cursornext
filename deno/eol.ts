@@ -2,7 +2,7 @@ export enum EolType {
   CR = '\r',
   LF = '\n',
   CRLF = '\r\n',
-  EOF = ''
+  EOF = '',
 }
 
 export class Eol {

@@ -9,10 +9,7 @@ export function locTest(
     column: number
   }
 ) {
-  const cursor = tt
-    .capture(input)
-    .toIter()
-    .next()
+  const cursor = tt.capture(input).toIter().next()
 
   const loc = cursor.getLoc()
 
@@ -20,7 +17,7 @@ export function locTest(
   t.is(loc.column, expected.column, cursor.doc)
 }
 
-test('`getLoc` should work probably', t => {
+test('`getLoc` should work probably', (t) => {
   const firstDoc = tt.trim(`
     Hello, World!
     This is an example 🌵\`getLoc\` test.
@@ -28,7 +25,7 @@ test('`getLoc` should work probably', t => {
 
   locTest(t, firstDoc, {
     line: 2,
-    column: 24
+    column: 24,
   })
 
   const secondDoc = tt.trim(`
@@ -37,7 +34,7 @@ test('`getLoc` should work probably', t => {
 
   locTest(t, secondDoc, {
     line: 1,
-    column: 60
+    column: 60,
   })
 })
 
@@ -46,27 +43,24 @@ export function extractLineTest(
   input: string,
   expected: string
 ) {
-  const cursor = tt
-    .capture(input)
-    .toIter()
-    .next()
+  const cursor = tt.capture(input).toIter().next()
 
   const loc = cursor.getLoc()
 
   const output = Array.from({ length: 3 }, (_v, k) => k)
-    .map(i => loc.line - 1 + i)
-    .map(lineNumber => {
+    .map((i) => loc.line - 1 + i)
+    .map((lineNumber) => {
       const line = cursor.extractLine(lineNumber)
 
       return line ? `${lineNumber} | ${line}` : undefined
     })
-    .filter(line => line)
+    .filter((line) => line)
     .join('\n')
 
   t.is(output, expected, cursor.doc)
 }
 
-test('`extractLine` should work probably', t => {
+test('`extractLine` should work probably', (t) => {
   const doc = tt.trim(`
 
 
@@ -86,10 +80,7 @@ export function extractEolTest(
   input: string,
   expected: EolType
 ) {
-  const cursor = tt
-    .capture(input)
-    .toIter()
-    .next()
+  const cursor = tt.capture(input).toIter().next()
 
   const loc = cursor?.getLoc()
   const eol = cursor?.extractEol(loc.line)
@@ -97,7 +88,7 @@ export function extractEolTest(
   t.is(eol?.type, expected, cursor.doc)
 }
 
-test('`extractEol` should work probably', t => {
+test('`extractEol` should work probably', (t) => {
   const doc = `
     Hello, World! 🌵(cursor)
   `
@@ -112,17 +103,14 @@ export function printDebugTest(
   input: string,
   expected: string
 ) {
-  const cursor = tt
-    .capture(input)
-    .toIter()
-    .next()
+  const cursor = tt.capture(input).toIter().next()
 
   const output = cursor.printDebug()
 
   t.is(output, expected, expected)
 }
 
-test('`printDebug` should work probably', t => {
+test('`printDebug` should work probably', (t) => {
   const doc = tt.trim(`
 
 

@@ -35,7 +35,7 @@ export class CaptureResult {
     for (const [label, index] of indexes) {
       result[label] = new Cursor({
         doc,
-        index
+        index,
       })
     }
 
@@ -49,7 +49,7 @@ export class CaptureResult {
       ([, index]) =>
         new Cursor({
           doc,
-          index
+          index,
         })
     )
   }
@@ -63,7 +63,7 @@ export class CaptureResult {
       cursors.push(
         new Cursor({
           doc,
-          index
+          index,
         })
       )
     }
@@ -97,17 +97,17 @@ export class CaptureResult {
 
             const start = new Cursor({
               doc,
-              index: lastIndex
+              index: lastIndex,
             })
             const end = new Cursor({
               doc,
-              index
+              index,
             })
 
             pairs.push({
               label,
               start,
-              end
+              end,
             })
           }
         }
@@ -118,17 +118,17 @@ export class CaptureResult {
           if (label === lastLabel) {
             const start = new Cursor({
               doc,
-              index: lastIndex
+              index: lastIndex,
             })
             const end = new Cursor({
               doc,
-              index
+              index,
             })
 
             pairs.push({
               label,
               start,
-              end
+              end,
             })
 
             stack.pop()
@@ -173,7 +173,7 @@ export class CaptureIterable {
         return value
           ? { value, done: false }
           : { value, done: true }
-      }
+      },
     }
   }
 }
@@ -190,21 +190,21 @@ export class CursorTest {
   constructor(options?: CursorTestOptions) {
     this._options = options || {
       prefix: '🌵',
-      noLabel: false
+      noLabel: false,
     }
   }
 
   config(testOptions: CursorTestOptions) {
     this._options = {
       ...this._options,
-      ...testOptions
+      ...testOptions,
     }
   }
 
   options(testOptions: CursorTestOptions) {
     return new CursorTest({
       ...this._options,
-      ...testOptions
+      ...testOptions,
     })
   }
 
@@ -214,7 +214,7 @@ export class CursorTest {
   ): CaptureResult {
     return this._inline(input, {
       ...this._options,
-      ...(testOptions || {})
+      ...(testOptions || {}),
     })
   }
 
@@ -238,7 +238,7 @@ export class CursorTest {
     const { prefix, noLabel } = {
       prefix: '🌵',
       noLabel: false,
-      ...testOptions
+      ...testOptions,
     }
     const prefixLen = prefix.length
 

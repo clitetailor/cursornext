@@ -47,7 +47,7 @@ export class Cursor {
   clone(options?: Partial<CursorStruct>): Cursor {
     return new Cursor({
       ...(this as CursorStruct),
-      ...(options ? options : {})
+      ...(options ? options : {}),
     })
   }
 
@@ -55,7 +55,7 @@ export class Cursor {
     this.compute()
 
     let line = (<Eol[]>this.eols).findIndex(
-      eol => this.index < eol.end
+      (eol) => this.index < eol.end
     )
 
     if (line === -1) {
@@ -68,7 +68,7 @@ export class Cursor {
     return new Loc({
       index: this.index,
       line,
-      column
+      column,
     })
   }
 
@@ -108,7 +108,7 @@ export class Cursor {
 
       const cursor = new Cursor({
         doc: this.doc,
-        index: 0
+        index: 0,
       })
 
       while (!cursor.isEof()) {
@@ -242,12 +242,12 @@ export class Cursor {
     if (index <= this.endIndex()) {
       if (index < 0) {
         return this.clone({
-          end: 0
+          end: 0,
         })
       }
 
       return this.clone({
-        end: index
+        end: index,
       })
     }
 
